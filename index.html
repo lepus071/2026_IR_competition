@@ -1,0 +1,2808 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>休退學風險雙迴圈處室匯流防護路網 (IR Dual-Loop Metro Map)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700;900&family=Noto+Sans+TC:wght@400;500;600;700;900&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+:root {
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --surface-alt: #f1f5f9;
+  --ink: #0f172a;
+  --ink-secondary: #334155;
+  --muted: #64748b;
+  --line-border: #cbd5e1;
+  --card-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+
+  /* Line & Department Colors (High Contrast Optimized) */
+  --c-admissions: #ea580c;  /* orange - admissions & exams */
+  --c-career: #7c3aed;      /* 晶紫羅蘭 - 職涯志向 UCAN (全新高對比紫色) */
+  --c-academic: #ca8a04;    /* mustard - registry & grades */
+  --c-trunk-ir: #0f766e;    /* 墨綠色 - IR 模型總站 */
+
+  --c-warning: #2563eb;     /* blue - 課務組 fast loop */
+  --c-attend: var(--c-warning);      /* unified with 課務組 fast loop */
+  --c-lms: var(--c-warning);         /* unified with 課務組 fast loop */
+  --c-triage: #c026d3;      /* 暖洋紅紫 - 導師/學輔名單總站 (全新高對比洋紅色) */
+  --c-feedback: #16a34a;    /* green - closed-loop feedback */
+
+  --font-serif: "Noto Serif TC", "Source Han Serif TC", serif;
+  --font-sans: "Noto Sans TC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", Consolas, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #090e17;
+    --surface: #141e2e;
+    --surface-alt: #0d1522;
+    --ink: #f8fafc;
+    --ink-secondary: #cbd5e1;
+    --muted: #94a3b8;
+    --line-border: #223249;
+    --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6);
+    --c-admissions: #fb923c;
+    --c-career: #a78bfa;     /* 晶紫羅蘭 (深色版) */
+    --c-academic: #facc15;   /* 琥珀金黃 (深色版) */
+    --c-trunk-ir: #2dd4bf;
+    --c-warning: #60a5fa;
+    --c-attend: var(--c-warning);
+    --c-lms: var(--c-warning);        /* 皇家寶藍 (深色版) */
+    --c-triage: #e879f9;     /* 暖洋紅紫 (深色版) */
+    --c-feedback: #4ade80;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #090e17;
+  --surface: #141e2e;
+  --surface-alt: #0d1522;
+  --ink: #f8fafc;
+  --ink-secondary: #cbd5e1;
+  --muted: #94a3b8;
+  --line-border: #223249;
+  --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6);
+  --c-admissions: #fb923c;
+  --c-career: #a78bfa;     /* 晶紫羅蘭 */
+  --c-academic: #facc15;   /* 琥珀金黃 */
+  --c-trunk-ir: #2dd4bf;
+  --c-warning: #60a5fa;
+  --c-attend: var(--c-warning);
+  --c-lms: var(--c-warning);        /* 皇家寶藍 */
+  --c-triage: #e879f9;     /* 暖洋紅紫 */
+  --c-feedback: #4ade80;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 100%;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+}
+body {
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header & Controls */
+header {
+  flex: 0 0 auto;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line-border);
+  padding: 10px 24px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  z-index: 50;
+  backdrop-filter: blur(8px);
+}
+
+.title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.metro-badge {
+  background: linear-gradient(135deg, var(--c-admissions), var(--c-warning));
+  color: #ffffff;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.title-group h1 {
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+.title-group p {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.nav-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.filter-btn {
+  background: var(--surface-alt);
+  border: 1px solid var(--line-border);
+  color: var(--ink-secondary);
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 6px 13px;
+  border-radius: 9999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+.filter-btn:hover {
+  border-color: var(--ink-secondary);
+  color: var(--ink);
+}
+.filter-btn.active {
+  background: var(--ink);
+  color: var(--bg);
+  border-color: var(--ink);
+}
+.filter-btn .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.theme-btn {
+  background: transparent;
+  border: 1px solid var(--line-border);
+  color: var(--ink);
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+/* Layout: Main Map Area + Detail Drawer */
+.main-container {
+  display: flex;
+  flex: 1 1 0;
+  min-height: 0;
+  min-width: 0;
+  height: 0; /* Strictly enforces flex allocation without blowout */
+  position: relative;
+  overflow: hidden;
+}
+
+.map-viewport {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  max-height: 100%;
+  position: relative;
+  overflow: hidden;
+  background-image: 
+    radial-gradient(var(--line-border) 1px, transparent 1px);
+  background-size: 28px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+}
+.map-viewport.panning {
+  cursor: grabbing !important;
+  user-select: none;
+}
+
+#metro-svg {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  min-width: 0;
+  min-height: 0;
+  display: block;
+  user-select: none;
+  touch-action: none;
+}
+
+/* Station Nodes - ZERO FLICKER */
+.station-node {
+  cursor: pointer;
+}
+.hit-area {
+  fill: transparent;
+  stroke: transparent;
+  cursor: pointer;
+  pointer-events: all;
+}
+.station-circle {
+  fill: var(--surface);
+  stroke-width: 4;
+  transition: stroke-width 0.15s ease, filter 0.15s ease, fill 0.15s ease;
+  pointer-events: none;
+}
+
+.station-node:hover .station-circle {
+  stroke-width: 6px;
+  filter: drop-shadow(0 0 8px rgba(0,0,0,0.35));
+}
+.station-node.active .station-circle {
+  fill: var(--ink) !important;
+  stroke: #ffffff !important;
+  stroke-width: 5px !important;
+  filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
+}
+
+/* Typography with Crisp White Halo to guarantee readability */
+.station-label-group, .station-label-group * {
+  pointer-events: none;
+}
+.station-name {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 15px;
+  fill: var(--ink);
+  paint-order: stroke fill;
+  stroke: var(--surface);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+.station-sub {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  fill: var(--muted);
+  font-weight: 600;
+  paint-order: stroke fill;
+  stroke: var(--surface);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+.station-code-pill {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  fill: #ffffff;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+/* Transfer Hub Styling */
+.transfer-pill {
+  fill: var(--surface);
+  stroke-width: 4;
+  rx: 16;
+  ry: 16;
+  pointer-events: none;
+  transition: all 0.2s ease;
+}
+.station-node:hover .transfer-pill {
+  filter: drop-shadow(0 0 10px rgba(0,0,0,0.35));
+}
+.station-node.active .transfer-pill {
+  stroke: var(--ink) !important;
+  filter: drop-shadow(0 0 12px rgba(0,0,0,0.5));
+}
+
+/* Branch Tracks */
+.track-bg {
+  fill: none;
+  stroke: var(--surface-alt);
+  stroke-width: 16;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.metro-branch {
+  fill: none;
+  stroke-width: 8.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: opacity 0.25s ease, stroke-width 0.25s ease;
+}
+.metro-branch.trunk {
+  stroke-width: 13;
+}
+
+/* Animated subtle train pulse */
+.metro-pulse {
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  stroke-dasharray: 10 40;
+  animation: trainRun 12s linear infinite;
+  pointer-events: none;
+  opacity: 0.85;
+}
+@keyframes trainRun {
+  to { stroke-dashoffset: -500; }
+}
+
+.dimmed {
+  opacity: 0.2 !important;
+  filter: grayscale(85%);
+}
+
+/* Metro Trains & Flow Animations */
+.metro-train {
+  pointer-events: none;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+.passenger-dot {
+  pointer-events: none;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.35));
+}
+
+/* Station Passenger Gathering (同色散落小人朝站點集中進站) */
+.station-crowd {
+  pointer-events: none;
+}
+.gathering-person {
+  pointer-events: none;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.35));
+}
+.trains-paused .gathering-person,
+.trains-paused .station-crowd {
+  animation-play-state: paused !important;
+}
+
+.hub-crowd-ripple {
+  fill: none;
+  pointer-events: none;
+  transform-origin: center;
+  animation: hubCrowdPulse 3s cubic-bezier(0.1, 0.8, 0.2, 1) infinite;
+}
+@keyframes hubCrowdPulse {
+  0% { r: 24px; opacity: 0.85; stroke-width: 2.5px; }
+  60% { opacity: 0.25; stroke-width: 1.2px; }
+  100% { r: 42px; opacity: 0; stroke-width: 0.5px; }
+}
+
+.trains-paused .metro-train,
+.trains-paused .passenger-dot,
+.trains-paused .hub-crowd-ripple,
+.trains-paused .metro-pulse {
+  animation-play-state: paused !important;
+}
+
+/* Floating Zoom Control Toolbar on Map */
+.zoom-toolbar {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: var(--surface);
+  border: 1px solid var(--line-border);
+  border-radius: 10px;
+  box-shadow: var(--card-shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 25;
+}
+.zoom-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--line-border);
+  color: var(--ink);
+  padding: 8px 12px;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.15s ease;
+}
+.zoom-btn:last-child {
+  border-bottom: none;
+}
+.zoom-btn:hover {
+  background: var(--surface-alt);
+}
+
+/* Legend Dock (Fixed Bottom Toolbar: Never squeezed, never disappears) */
+.legend-dock {
+  position: absolute;
+  bottom: 14px;
+  left: 20px;
+  background: var(--surface);
+  border: 1px solid var(--line-border);
+  border-radius: 12px;
+  padding: 9px 14px;
+  box-shadow: 0 10px 28px -4px rgba(0, 0, 0, 0.2), 0 3px 8px -2px rgba(0, 0, 0, 0.08);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  backdrop-filter: blur(12px);
+  max-width: min(840px, calc(100% - 40px));
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.legend-dock.collapsed {
+  padding: 6px 12px;
+}
+.legend-dock.collapsed .legend-dock-body {
+  display: none !important;
+}
+.legend-dock-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  user-select: none;
+}
+.legend-dock-title {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 0.86rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink);
+  cursor: pointer;
+}
+.legend-dock-toggle {
+  background: var(--surface-alt);
+  border: 1px solid var(--line-border);
+  color: var(--ink-secondary);
+  font-family: var(--font-sans);
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+.legend-dock-toggle:hover {
+  background: var(--ink);
+  color: var(--bg);
+}
+.legend-dock-body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+}
+.legend-chip {
+  background: var(--surface-alt);
+  border: 1px solid var(--line-border);
+  color: var(--ink-secondary);
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  user-select: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+.legend-chip:hover {
+  background: var(--surface);
+  border-color: var(--ink);
+  color: var(--ink);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+.chip-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+
+.drawer-header {
+  flex: 0 0 auto;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--line-border);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--surface-alt);
+}
+.drawer-line-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  color: #ffffff;
+  margin-bottom: 6px;
+}
+.drawer-title {
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  font-weight: 900;
+  line-height: 1.3;
+}
+.drawer-eng {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.drawer-content {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 22px 24px 60px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-border) transparent;
+}
+.drawer-content::-webkit-scrollbar {
+  width: 6px;
+}
+.drawer-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+.drawer-content::-webkit-scrollbar-thumb {
+  background-color: var(--line-border);
+  border-radius: 4px;
+}
+
+.info-card {
+  background: var(--surface-alt);
+  border: 1px solid var(--line-border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: grid;
+  gap: 8px;
+}
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+}
+.info-label {
+  color: var(--muted);
+  font-weight: 500;
+}
+.info-val {
+  color: var(--ink);
+  font-weight: 600;
+  text-align: right;
+}
+
+.section-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.item-list {
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+.item-list li {
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--ink-secondary);
+  position: relative;
+  padding-left: 18px;
+}
+.item-list li::before {
+  content: "•";
+  position: absolute;
+  left: 4px;
+  color: var(--muted);
+  font-weight: bold;
+}
+
+/* Exam Profile Bar Chart Mockup */
+.profile-bar-chart {
+  display: grid;
+  gap: 7px;
+  margin-top: 6px;
+  background: var(--surface);
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--line-border);
+}
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  font-family: var(--font-mono);
+}
+.bar-name { width: 36px; color: var(--muted); }
+.bar-track { flex: 1; height: 8px; background: var(--surface-alt); border-radius: 4px; overflow: hidden; position: relative; }
+/* Detail Drawer (Collapsible) */
+.detail-drawer {
+  width: 420px;
+  max-width: 45vw;
+  height: 100%;
+  max-height: 100%;
+  background: var(--surface);
+  border-left: 1px solid var(--line-border);
+  display: flex;
+  flex-direction: column;
+  z-index: 50;
+  box-shadow: -4px 0 20px rgba(0,0,0,0.06);
+  transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+  overflow: hidden; /* Header fixed at top, only drawer-content scrolls */
+  flex-shrink: 0;
+}
+.detail-drawer.collapsed {
+  display: none !important;
+}
+.drawer-close-btn {
+  background: transparent;
+  border: 1px solid var(--line-border);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+.drawer-close-btn:hover {
+  background: var(--surface-alt);
+  color: var(--ink);
+}
+.drawer-floating-tab {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  background: var(--surface);
+  border: 1px solid var(--line-border);
+  border-radius: 999px;
+  padding: 8px 16px;
+  box-shadow: var(--card-shadow);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+.drawer-floating-tab:hover {
+  background: var(--surface-alt);
+  border-color: var(--ink-secondary);
+}
+
+/* Responsive constraints without breaking flex layout */
+@media (max-width: 1200px) {
+  .detail-drawer { width: 380px; }
+}
+@media (max-width: 900px) {
+  .detail-drawer { width: 330px; }
+  .legend-dock { max-width: calc(100% - 24px); left: 12px; bottom: 10px; }
+}
+@media (max-width: 768px) {
+  .detail-drawer {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: 360px;
+    z-index: 100;
+  }
+}
+
+/* ===== Risk-change simulation module ===== */
+:root { --sim-high: #dc2626; --sim-mid: #f59e0b; --sim-low: #94a3b8; }
+:root[data-theme="dark"] { --sim-high: #f87171; --sim-mid: #fbbf24; --sim-low: #64748b; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --sim-high: #f87171; --sim-mid: #fbbf24; --sim-low: #64748b; } }
+.sim-panel {
+  position: absolute; top: 14px; left: 20px; z-index: 120;
+  width: 400px; max-width: calc(100% - 40px); max-height: calc(100% - 120px); overflow-y: auto;
+  background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line-border); border-radius: 12px;
+  box-shadow: var(--card-shadow); padding: 12px 14px; font-size: 13px;
+}
+.sim-panel[hidden] { display: none; }
+.sim-head { display: flex; align-items: center; gap: 8px; cursor: move; user-select: none; touch-action: none; }
+.sim-panel.dragging { opacity: .85; }
+.sim-panel.collapsed > :not(.sim-head) { display: none; }
+.sim-stage-pill { background: var(--c-trunk-ir); color: #fff; border-radius: 999px; padding: 2px 9px; font: 600 11px var(--font-mono); }
+.sim-title { font-weight: 700; font-size: 14px; flex: 1; }
+.sim-close { border: none; background: none; color: var(--muted); cursor: pointer; font-size: 14px; }
+.sim-note { margin: 6px 0; font-size: 11px; color: var(--muted); border-left: 3px solid var(--sim-mid); padding-left: 6px; }
+.sim-desc { color: var(--ink-secondary); line-height: 1.5; margin-bottom: 6px; }
+.sim-sub { font-weight: 600; margin-bottom: 4px; min-height: 1em; }
+.sim-table { display: flex; flex-direction: column; gap: 4px; }
+.sim-row { display: grid; grid-template-columns: 62px 1fr 44px 46px; align-items: center; gap: 6px; padding: 3px 4px; border-radius: 6px; transition: background .3s; }
+.sim-row.flag { background: color-mix(in srgb, var(--sim-high) 14%, transparent); }
+.sim-row .sid { font: 600 12px var(--font-mono); }
+.sim-row .attr { font-size: 11.5px; color: var(--ink-secondary); }
+.sim-bar { height: 8px; background: var(--surface-alt); border-radius: 4px; overflow: hidden; }
+.sim-bar > i { display: block; height: 100%; border-radius: 4px; transition: width .6s, background .6s; }
+.sim-score { font: 600 12px var(--font-mono); text-align: right; }
+.sim-tier { font-size: 11px; font-weight: 700; text-align: center; border-radius: 4px; padding: 1px 0; color: #fff; }
+.sim-controls { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.sim-controls button { flex: 1; border: 1px solid var(--line-border); background: var(--surface-alt); color: var(--ink); border-radius: 8px; padding: 6px 4px; cursor: pointer; font-size: 12px; }
+.sim-controls button:hover { border-color: var(--c-trunk-ir); }
+.sim-controls button:disabled { opacity: .4; cursor: default; }
+.sim-token { transition: transform .9s cubic-bezier(.4,0,.2,1); }
+.sim-token .body { transition: fill .5s; }
+.sim-token .body use { filter: drop-shadow(0 0 1.2px var(--ink)); }
+.sim-token text { font: 700 10px var(--font-mono); fill: var(--ink); text-anchor: middle; dominant-baseline: central;
+  paint-order: stroke; stroke: var(--surface); stroke-width: 3px; }
+.sim-token .tag { font: 600 9px var(--font-mono); fill: var(--muted); }
+.sim-focus { fill: none; stroke-width: 3; animation: simPulse 1.4s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes simPulse { 0% { opacity: .9; transform: scale(.6); } 100% { opacity: 0; transform: scale(1.6); } }
+.sim-alert { animation: simBlink .7s ease-in-out infinite alternate; }
+@keyframes simBlink { from { opacity: .25; } to { opacity: 1; } }
+.sim-plus { font: 700 12px var(--font-mono); fill: var(--sim-high); animation: simRise 1.4s ease-out forwards; }
+@keyframes simRise { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-22px); } }
+@media (max-width: 760px) { .sim-panel { left: 12px; top: 10px; width: auto; right: 12px; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title-group">
+    <div class="metro-badge">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 3v12"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
+      StayOn IR-NETWORK
+    </div>
+    <div>
+      <h1>StayOn 學生休退學風險雙迴圈處室匯流防護路網</h1>
+      <p>StayOn Project • Institutional Research Multi-Department Confluence Transit Map</p>
+    </div>
+  </div>
+
+  <div class="nav-tools">
+    <button class="filter-btn active" data-filter="all">全線總覽</button>
+    <button class="filter-btn" data-filter="cat-admissions"><span class="dot" style="background:var(--c-admissions)"></span>入學與大考資料</button>
+    <button class="filter-btn" data-filter="cat-career"><span class="dot" style="background:var(--c-career)"></span>職涯興趣 (UCAN)</button>
+    <button class="filter-btn" data-filter="cat-academic"><span class="dot" style="background:var(--c-academic)"></span>歷年學業與預警</button>
+    <button class="filter-btn" data-filter="cat-interm"><span class="dot" style="background:var(--c-warning)"></span>學期中即時預警</button>
+    <button class="filter-btn" data-filter="cat-feedback"><span class="dot" style="background:var(--c-feedback)"></span>輔導與閉環回饋</button>
+    <button class="filter-btn active" id="btn-toggle-trains" title="開啟/暫停列車與人流動畫"><span class="dot" style="background:#22c55e"></span>🚇 列車運轉</button>
+    <button class="filter-btn active" id="btn-toggle-legend" title="顯示/隱藏圖例面板"><span class="dot" style="background:var(--c-trunk-ir)"></span>📌 圖例列</button>
+    <button class="filter-btn active" id="btn-toggle-drawer" title="展開/收合詳細說明欄"><span class="dot" style="background:var(--c-triage)"></span>📑 說明欄</button>
+    <button class="filter-btn" id="btn-toggle-sim" title="學生風險變化模組（模擬示意）"><span class="dot" style="background:#ef4444"></span>🎬 風險變化</button>
+    <button class="theme-btn" id="theme-toggle" title="切換深淺模式">🌗 主題</button>
+  </div>
+</header>
+
+<div class="main-container">
+  <div class="map-viewport" id="viewport-container">
+    
+    <!-- Floating Zoom Toolbar -->
+    <div class="zoom-toolbar">
+      <button class="zoom-btn" id="btn-zoom-in" title="放大視野">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><path d="M11 8v6"/><path d="M8 11h6"/></svg>
+        放大
+      </button>
+      <button class="zoom-btn" id="btn-zoom-out" title="縮小視野">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><path d="M8 11h6"/></svg>
+        縮小
+      </button>
+      <button class="zoom-btn" id="btn-zoom-reset" title="重置全景視野">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        重置全景
+      </button>
+    </div>
+
+    <!-- MAIN SVG TRANSIT MAP (Completely collision-free coordinate layout: 1400 x 760) -->
+    <svg id="metro-svg" viewBox="0 0 1400 760" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+          <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.25"/>
+        </filter>
+        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+              <!-- Stylized Student/Data Person Figurine (同色小人: 資料如人散落各處，進站搭車) -->
+        <g id="metro-person-symbol">
+          <!-- Head with subtle crisp border -->
+          <circle cx="0" cy="-5.5" r="2.2" stroke="#ffffff" stroke-width="0.7" />
+          <!-- Torso and walking legs -->
+          <path d="M -2.5,-1.8 C -2.5,-2.8 2.5,-2.8 2.5,-1.8 L 2.2,2.8 L 2.8,7.2 L 1.2,7.2 L 0.5,3.2 L -0.5,3.2 L -1.2,7.2 L -2.8,7.2 L -2.2,2.8 Z" stroke="#ffffff" stroke-width="0.7" stroke-linejoin="round" />
+        </g>
+      </defs>
+
+      <!-- ========================================== -->
+      <!-- 1. 背景軌道 (Background Tracks)              -->
+      <!-- ========================================== -->
+      <g id="bg-tracks">
+        <!-- 慢迴圈 3 條處室支線匯流至 IR 總站 (580, 280) -->
+        <path class="track-bg" d="M 180,160 L 470,160 C 530,160 550,220 580,280" />
+        <path class="track-bg" d="M 180,280 L 580,280" />
+        <path class="track-bg" d="M 180,400 L 470,400 C 530,400 550,340 580,280" />
+
+        <!-- 中央交接幹線 (580 to 820) -->
+        <path class="track-bg" d="M 580,280 L 820,280" />
+
+        <!-- 快迴圈 3 條即時信號支線匯流至 輔導名單總站 (1290, 280) -->
+        <path class="track-bg" d="M 820,280 C 860,220 890,160 950,160 L 1220,160 C 1260,160 1275,220 1290,280" />
+        <path class="track-bg" d="M 820,280 L 1290,280" />
+        <path class="track-bg" d="M 820,280 C 860,340 890,400 950,400 L 1220,400 C 1260,400 1275,340 1290,280" />
+
+        <!-- 閉環回饋線 (從名單總站沿 Y=600 回流至 IR 總站) -->
+        <path class="track-bg" d="M 1290,280 L 1290,560 C 1290,600 1260,600 1220,600 L 620,600 C 590,600 580,590 580,560 L 580,280" />
+      </g>
+
+      <!-- ========================================== -->
+      <!-- 2. 彩色支線與幹線 (Active Colored Lines)      -->
+      <!-- ========================================== -->
+      <g id="metro-branches">
+        <!-- Branch 1: 招生與大考資料線 (玫瑰紅) -->
+        <path id="branch-admissions" class="metro-branch" stroke="var(--c-admissions)" d="M 180,160 L 470,160 C 530,160 550,220 580,280" />
+        <path class="metro-pulse" d="M 180,160 L 470,160 C 530,160 550,220 580,280" />
+
+        <!-- Branch 2: 職涯志向 UCAN 線 (薰衣草紫) -->
+        <path id="branch-career" class="metro-branch" stroke="var(--c-career)" d="M 180,280 L 580,280" />
+        <path class="metro-pulse" d="M 180,280 L 580,280" style="animation-duration: 8s;" />
+
+        <!-- Branch 3: 歷程學業與預警線 (琥珀金) -->
+        <path id="branch-academic" class="metro-branch" stroke="var(--c-academic)" d="M 180,400 L 470,400 C 530,400 550,340 580,280" />
+        <path class="metro-pulse" d="M 180,400 L 470,400 C 530,400 550,340 580,280" style="animation-duration: 9s;" />
+
+        <!-- Central Trunk: IR 交付幹線 (墨綠粗線) -->
+        <path id="trunk-handoff" class="metro-branch trunk" stroke="var(--c-trunk-ir)" d="M 580,280 L 820,280" />
+        <path class="metro-pulse" d="M 580,280 L 820,280" style="stroke-width: 4.5; animation-duration: 5s;" />
+
+        <!-- Branch 4: 課務期中預警線 (天藍) -->
+        <path id="branch-warning" class="metro-branch" stroke="var(--c-warning)" d="M 820,280 C 860,220 890,160 950,160 L 1220,160 C 1260,160 1275,220 1290,280" />
+        <path class="metro-pulse" d="M 820,280 C 860,220 890,160 950,160 L 1220,160 C 1260,160 1275,220 1290,280" style="animation-duration: 10s;" />
+
+        <!-- Branch 5: 授課教師 出勤點名線 (翡翠綠) -->
+        <path id="branch-attend" class="metro-branch" stroke="var(--c-attend)" d="M 820,280 L 1290,280" />
+        <path class="metro-pulse" d="M 820,280 L 1290,280" style="animation-duration: 7s;" />
+
+        <!-- Branch 6: 新 ee-class 數位教學平台線 (靛藍) -->
+        <path id="branch-lms" class="metro-branch" stroke="var(--c-lms)" d="M 820,280 C 860,340 890,400 950,400 L 1220,400 C 1260,400 1275,340 1290,280" />
+        <path class="metro-pulse" d="M 820,280 C 860,340 890,400 950,400 L 1220,400 C 1260,400 1275,340 1290,280" style="animation-duration: 11s;" />
+
+        <!-- Feedback Branch: 閉環成效回流線 (松石綠虛線) -->
+        <path id="branch-feedback" class="metro-branch" stroke="var(--c-feedback)" stroke-dasharray="9 7" d="M 1290,280 L 1290,560 C 1290,600 1260,600 1220,600 L 620,600 C 590,600 580,590 580,560 L 580,280" />
+      </g>
+
+      <!-- ========================================== -->
+      <!-- 2.1 樞紐人流匯聚脈衝 (Hub Crowd Ripples)      -->
+      <!-- ========================================== -->
+      <g id="hub-crowd-ripples">
+        <!-- IR 總站 (580, 280) -->
+        <circle cx="580" cy="280" r="28" stroke="var(--c-trunk-ir)" class="hub-crowd-ripple" />
+        <circle cx="580" cy="280" r="28" stroke="var(--c-trunk-ir)" class="hub-crowd-ripple" style="animation-delay: 1.5s;" />
+
+        <!-- 期初交接閘口 (750, 280) -->
+        <circle cx="750" cy="280" r="26" stroke="var(--c-warning)" class="hub-crowd-ripple" style="animation-delay: 0.8s;" />
+
+        <!-- IR 快迴圈匯流計算站 (1290, 280) -->
+        <circle cx="1290" cy="280" r="28" stroke="var(--c-trunk-ir)" class="hub-crowd-ripple" style="animation-delay: 0.5s;" />
+        <!-- 三級關懷名單決策總站 (1290, 440) -->
+        <circle cx="1290" cy="440" r="28" stroke="var(--c-triage)" class="hub-crowd-ripple" style="animation-delay: 2s;" />
+
+        <!-- 輔導晤談站 (1040, 600) & 次學期校正站 (720, 600) -->
+        <circle cx="1040" cy="600" r="24" stroke="var(--c-feedback)" class="hub-crowd-ripple" style="animation-delay: 1.2s;" />
+        <circle cx="720" cy="600" r="24" stroke="var(--c-feedback)" class="hub-crowd-ripple" style="animation-delay: 2.2s;" />
+      </g>
+
+      <!-- ========================================== -->
+      <!-- 2.15 數據散落小人集中與分流派遣 (Data People Movement) -->
+      <!-- 工作流：各處室站點小人進站搭車；IR模型總站不設小人；交接閘口與三級決策總站小人走出分流 -->
+      <!-- 軌道已由捷運列車行駛載運，不設重複人流圓點 -->
+      <!-- ========================================== -->
+      <g id="station-gathering-crowds">
+        <!-- 站點人流 [小人進站 (In)]: crowd-portal-admissions at (180, 160) -->
+        <g class="station-crowd" id="crowd-portal-admissions" transform="translate(180, 160)">
+          <g class="gathering-person" fill="var(--c-admissions)">
+            <use href="#metro-person-symbol">
+              <animateTransform attributeName="transform" type="translate" values="-45,-18; -33.8,-14.5; -22.5,-9.0; -11.2,-5.5; 0,0" keyTimes="0; 0.25; 0.55; 0.8; 1" dur="4.2s" repeatCount="indefinite" begin="0.5s" />
+              <animate attributeName="opacity" values="0; 0.95; 0.95; 0.25; 0" keyTimes="0; 0.15; 0.75; 0.92; 1" dur="4.2s" repeatCount="indefinite" begin="0.5s" />
+            </use>
+          </g>
+        </g>
+        <!-- 站點人流 [小人進站 (In)]: crowd-st-route at (270, 160) -->
+        <g class="station-crowd" id="crowd-st-route" transform="translate(270, 160)">
+          <g class="gathering-person" fill="var(--c-admissions)">
+            <use href="#metro-person-symbol">
+              <animateTransform attributeName="transform" type="translate" values="-40,-32; -30.0,-25.0; -20.0,-16.0; -10.0,-9.0; 0,0" keyTimes="0; 0.25; 0.55; 0.8; 1" dur="4.5s" repeatCount="indefinite" begin="0s" />
+              <animate attributeName="opacity" values="0; 0.95; 0.95; 0.25; 0" keyTimes="0; 0.15; 0.75; 0.92; 1" dur="4.5s" repeatCount="indefinite" begin="0s" />
+            </use>
+          </g>
+          <g class="gathering-person" fill="var(--c-admissions)">
+            <use href="#metro-person-symbol">
+              <animateTransform attributeName="transform" type="translate" values="36,34; 27.0,24.5; 18.0,17.0; 9.0,7.5; 0,0" keyTimes="0; 0.25; 0.55; 0.8; 1" dur="4.5s" repeatCount="indefinite" begin="2.2s" />
+              <animate attributeName="opacity" values="0; 0.95; 0.95; 0.25; 0" keyTimes="0; 0.15; 0.75; 0.92; 1" dur="4.5s" repeatCount="indefinite" begin="2.2s" />
+            </use>
+          </g>
+        </g>
+        <!-- 站點人流 [小人進站 (In)]: crowd-st-exam at (440, 160) -->
+        <g class="station-crowd" id="crowd-st-exam" transform="translate(440, 160)">
+          <g class="gathering-person" fill="var(--c-admissions)">
+            <use href="#metro-person-symbol">
+              <animateTransform attributeName="transform" type="translate" values="36,-34; 27.0,-26.5; 18.0,-17.0; 9.0,-9.5; 0,0" keyTimes="0; 0.25; 0.55; 0.8; 1" dur="4.5s" repeatCount="indefinite" begin="1.0s" />
+              <animate attributeName="opacity" values="0; 0.95; 0.95; 0.25; 0" keyTimes="0; 0.15; 0.75; 0.92; 1" dur="4.5s" repeatCount="indefinite" begin="1.0s" />
+            </use>
+          </g>
+        </g>
+        <!-- 站點人流 [小人進站 (In)]: crowd-portal-career at (180, 280) -->
+        <g class="station-crowd" id="crowd-portal-career" transform="translate(180, 280)">
+          <g class="gathering-person" fill="var(--c-career)">
+            <use href="#metro-person-symbol">
+              <animateTransform attributeName="transform" type="translate" values="-45,-18; -33.8,-14.5; -22.5,-9.0; -11.2,-5.5; 0,0" keyTimes="0; 0.25; 0.55; 0.8; 1" dur="4.2s" repeatCount="indefinite" begin="0.8s" />
+              <animate attributeName="opacity" values="0; 0.95; 0.95; 0.25; 0" keyTimes="0; 0.15; 0.75; 0.92; 1" dur="4.2s" repeatCount="indefinite" begin="0.8s" />
+            </use>
+          </g>
+        </g>
+        <!-- 站點人流 [小人進站 (In)]: crowd-st-ucan at (355, 280) -->
+        <g class="station-crowd" id="crowd-st-ucan" transform="translate(355, 280)">
+          <g class="gathering-person" fill="var(--c-career)">
+            <use href="#metro-person-symbol">
+              <animateTransform attributeName="transform" type="translate" values="-38,34; -28.5,24.5; -19.0,17.0; -9.5,7.5; 0,0" keyTimes="0; 0.25; 0.55; 0.8; 1" dur="4.5s" repeatCount="indefinite" begin="0.3s" />
+              <animate attributeName="opacity" values="0; 0.95; 0.95; 0.25; 0" keyTimes="0; 0.15; 0.75; 0.92; 1" dur="4.5s" repeatCount="indefinite" begin="0.3s" />
+            </use>
+          </g>
+          <g class="gathering-person" fill="var(--c-career)">
+            <use href="#metro-person-symbol">
+              <animateTransform attributeName="transform" type="translate" values="38,-32; 28.5,-25.0; 19.0,-16.0; 9.5,-9.0; 0,0" keyTimes="0; 0.25; 0.55; 0.8; 1" dur="4.5s" repeatCount="indefinite" begin="2.5s" />
+              <animate attributeName="opacity" values="0; 0.95; 0.95; 0.25; 0" keyTimes="0; 0.15; 0.75; 0.92; 1" dur="4.5s" repeatCount="indefinite" begin="2.5s" />
+            </use>
+          </g>
+        </g>
+        <!-- 站點人流 [小人進站 (In)]: crowd-portal-academic at (180, 400) -->
+        <g class="station-crowd" id="crowd-portal-academic" transform="translate(180, 400)">
+          <g class="gathering-person" fill="var(--c-academic)">
+            <use href="#metro-person-symbol">
+              <animateTransform attributeName="transform" type="translate" values="-45,18; -33.8,12.5; -22.5,9.0; -11.2,3.5; 0,0" keyTimes="0; 0.25; 0.55; 0.8; 1" dur="4.2s" repeatCount="indefinite" begin="0.4s" />
+              <animate attributeName="opacity" values="0; 0.95; 0.95; 0.25; 0" keyTimes="0; 0.15; 0.75; 0.92; 1" dur="4.2s" repeatCount="indefinite" begin="0.4s" />
+            </use>
+          </g>
+        </g>
+        <!-- 站點人流 [小人進站 (In)]: crowd-st-grade at (355, 400) -->
+        <g class="station-crowd" id="crowd-st-grade" transform="translate(355, 400)">
+          <g class="gathering-person" fill="var(--c-academic)">
+            <use href="#metro-person-symbol">
+              <animateTransform attributeName="transform" type="translate" values="-38,-38; -28.5,-29.5; -19.0,-19.0; -9.5,-10.5; 0,0" keyTimes="0; 0.25; 0.55; 0.8; 1" dur="4.5s" repeatCount="indefinite" begin="0.6s" />
+              <animate attributeName="opacity" values="0; 0.95; 0.95; 0.25; 0" keyTimes="0; 0.15; 0.75; 0.92; 1" dur="4.5s" repeatCount="indefinite" begin="0.6s" />
+            </use>
+          </g>
+          <g class="gathering-person" fill="var(--c-academic)">
+            <use href="#metro-person-symbol">
+              <animateTransform attributeName="transform" type="translate" values="38,38; 28.5,27.5; 19.0,19.0; 9.5,8.5; 0,0" keyTimes="0; 0.25; 0.55; 0.8; 1" dur="4.5s" repeatCount="indefinite" begin="2.8s" />
+              <animate attributeName="opacity" values="0; 0.95; 0.95; 0.25; 0" keyTimes="0; 0.15; 0.75; 0.92; 1" dur="4.5s" repeatCount="indefinite" begin="2.8s" />
+            </use>
+          </g>
+        </g>
+        <!-- 站點人流 [小人走出 (Out)]: crowd-hub-handoff at (750, 280) -->
+        <g class="station-crowd" id="crowd-hub-handoff" transform="translate(750, 280)">
+          <g class="gathering-person" fill="var(--c-trunk-ir)">
+            <use href="#metro-person-symbol">
+              <animateTransform attributeName="transform" type="translate" values="0,0; 11.5,-10.5; 23.0,-19.0; 34.5,-29.5; 46,-38" keyTimes="0; 0.25; 0.55; 0.8; 1" dur="4.2s" repeatCount="indefinite" begin="0.4s" />
+              <animate attributeName="opacity" values="0; 0.95; 0.95; 0.25; 0" keyTimes="0; 0.15; 0.75; 0.92; 1" dur="4.2s" repeatCount="indefinite" begin="0.4s" />
+            </use>
+          </g>
+          <g class="gathering-person" fill="var(--c-warning)">
+            <use href="#metro-person-symbol">
+              <animateTransform attributeName="transform" type="translate" values="0,0; 11.5,8.5; 23.0,19.0; 34.5,27.5; 46,38" keyTimes="0; 0.25; 0.55; 0.8; 1" dur="4.2s" repeatCount="indefinite" begin="2.4s" />
+              <animate attributeName="opacity" values="0; 0.95; 0.95; 0.25; 0" keyTimes="0; 0.15; 0.75; 0.92; 1" dur="4.2s" repeatCount="indefinite" begin="2.4s" />
+            </use>
+          </g>
+        </g>
+        <!-- 站點人流 [小人進站 (In)]: crowd-portal-warning at (850, 160) -->
+        <g class="station-crowd" id="crowd-portal-warning" transform="translate(850, 160)">
+          <g class="gathering-person" fill="var(--c-warning)">
+            <use href="#metro-person-symbol">
+              <animateTransform attributeName="transform" type="translate" values="42,-18; 31.5,-14.5; 21.0,-9.0; 10.5,-5.5; 0,0" keyTimes="0; 0.25; 0.55; 0.8; 1" dur="4.2s" repeatCount="indefinite" begin="0.6s" />
+              <animate attributeName="opacity" values="0; 0.95; 0.95; 0.25; 0" keyTimes="0; 0.15; 0.75; 0.92; 1" dur="4.2s" repeatCount="indefinite" begin="0.6s" />
+            </use>
+          </g>
+        </g>
+        <!-- 站點人流 [小人進站 (In)]: crowd-st-mid at (1075, 160) -->
+        <g class="station-crowd" id="crowd-st-mid" transform="translate(1075, 160)">
+          <g class="gathering-person" fill="var(--c-warning)">
+            <use href="#metro-person-symbol">
+              <animateTransform attributeName="transform" type="translate" values="-38,-32; -28.5,-25.0; -19.0,-16.0; -9.5,-9.0; 0,0" keyTimes="0; 0.25; 0.55; 0.8; 1" dur="4.5s" repeatCount="indefinite" begin="0.2s" />
+              <animate attributeName="opacity" values="0; 0.95; 0.95; 0.25; 0" keyTimes="0; 0.15; 0.75; 0.92; 1" dur="4.5s" repeatCount="indefinite" begin="0.2s" />
+            </use>
+          </g>
+          <g class="gathering-person" fill="var(--c-warning)">
+            <use href="#metro-person-symbol">
+              <animateTransform attributeName="transform" type="translate" values="38,34; 28.5,24.5; 19.0,17.0; 9.5,7.5; 0,0" keyTimes="0; 0.25; 0.55; 0.8; 1" dur="4.5s" repeatCount="indefinite" begin="2.4s" />
+              <animate attributeName="opacity" values="0; 0.95; 0.95; 0.25; 0" keyTimes="0; 0.15; 0.75; 0.92; 1" dur="4.5s" repeatCount="indefinite" begin="2.4s" />
+            </use>
+          </g>
+        </g>
+        <!-- 站點人流 [小人進站 (In)]: crowd-portal-attend at (850, 280) -->
+        <g class="station-crowd" id="crowd-portal-attend" transform="translate(850, 280)">
+          <g class="gathering-person" fill="var(--c-attend)">
+            <use href="#metro-person-symbol">
+              <animateTransform attributeName="transform" type="translate" values="42,18; 31.5,12.5; 21.0,9.0; 10.5,3.5; 0,0" keyTimes="0; 0.25; 0.55; 0.8; 1" dur="4.2s" repeatCount="indefinite" begin="0.3s" />
+              <animate attributeName="opacity" values="0; 0.95; 0.95; 0.25; 0" keyTimes="0; 0.15; 0.75; 0.92; 1" dur="4.2s" repeatCount="indefinite" begin="0.3s" />
+            </use>
+          </g>
+        </g>
+        <!-- 站點人流 [小人進站 (In)]: crowd-st-att6 at (940, 280) -->
+        <g class="station-crowd" id="crowd-st-att6" transform="translate(940, 280)">
+          <g class="gathering-person" fill="var(--c-attend)">
+            <use href="#metro-person-symbol">
+              <animateTransform attributeName="transform" type="translate" values="-38,34; -28.5,24.5; -19.0,17.0; -9.5,7.5; 0,0" keyTimes="0; 0.25; 0.55; 0.8; 1" dur="4.2s" repeatCount="indefinite" begin="1.2s" />
+              <animate attributeName="opacity" values="0; 0.95; 0.95; 0.25; 0" keyTimes="0; 0.15; 0.75; 0.92; 1" dur="4.2s" repeatCount="indefinite" begin="1.2s" />
+            </use>
+          </g>
+        </g>
+        <!-- 站點人流 [小人進站 (In)]: crowd-st-att12 at (1110, 280) -->
+        <g class="station-crowd" id="crowd-st-att12" transform="translate(1110, 280)">
+          <g class="gathering-person" fill="var(--c-attend)">
+            <use href="#metro-person-symbol">
+              <animateTransform attributeName="transform" type="translate" values="38,-34; 28.5,-26.5; 19.0,-17.0; 9.5,-9.5; 0,0" keyTimes="0; 0.25; 0.55; 0.8; 1" dur="4.2s" repeatCount="indefinite" begin="1.8s" />
+              <animate attributeName="opacity" values="0; 0.95; 0.95; 0.25; 0" keyTimes="0; 0.15; 0.75; 0.92; 1" dur="4.2s" repeatCount="indefinite" begin="1.8s" />
+            </use>
+          </g>
+        </g>
+        <!-- 站點人流 [小人進站 (In)]: crowd-portal-lms at (850, 400) -->
+        <g class="station-crowd" id="crowd-portal-lms" transform="translate(850, 400)">
+          <g class="gathering-person" fill="var(--c-lms)">
+            <use href="#metro-person-symbol">
+              <animateTransform attributeName="transform" type="translate" values="42,18; 31.5,12.5; 21.0,9.0; 10.5,3.5; 0,0" keyTimes="0; 0.25; 0.55; 0.8; 1" dur="4.2s" repeatCount="indefinite" begin="0.7s" />
+              <animate attributeName="opacity" values="0; 0.95; 0.95; 0.25; 0" keyTimes="0; 0.15; 0.75; 0.92; 1" dur="4.2s" repeatCount="indefinite" begin="0.7s" />
+            </use>
+          </g>
+        </g>
+        <!-- 站點人流 [小人進站 (In)]: crowd-st-quiz at (1010, 400) -->
+        <g class="station-crowd" id="crowd-st-quiz" transform="translate(1010, 400)">
+          <g class="gathering-person" fill="var(--c-lms)">
+            <use href="#metro-person-symbol">
+              <animateTransform attributeName="transform" type="translate" values="-36,-38; -27.0,-29.5; -18.0,-19.0; -9.0,-10.5; 0,0" keyTimes="0; 0.25; 0.55; 0.8; 1" dur="4.2s" repeatCount="indefinite" begin="0.5s" />
+              <animate attributeName="opacity" values="0; 0.95; 0.95; 0.25; 0" keyTimes="0; 0.15; 0.75; 0.92; 1" dur="4.2s" repeatCount="indefinite" begin="0.5s" />
+            </use>
+          </g>
+        </g>
+        <!-- 站點人流 [小人進站 (In)]: crowd-st-lms at (1175, 400) -->
+        <g class="station-crowd" id="crowd-st-lms" transform="translate(1175, 400)">
+          <g class="gathering-person" fill="var(--c-lms)">
+            <use href="#metro-person-symbol">
+              <animateTransform attributeName="transform" type="translate" values="36,38; 27.0,27.5; 18.0,19.0; 9.0,8.5; 0,0" keyTimes="0; 0.25; 0.55; 0.8; 1" dur="4.2s" repeatCount="indefinite" begin="2.0s" />
+              <animate attributeName="opacity" values="0; 0.95; 0.95; 0.25; 0" keyTimes="0; 0.15; 0.75; 0.92; 1" dur="4.2s" repeatCount="indefinite" begin="2.0s" />
+            </use>
+          </g>
+        </g>
+        <!-- 站點人流 [小人走出 (Out)]: crowd-st-list at (1290, 440) -->
+        <g class="station-crowd" id="crowd-st-list" transform="translate(1290, 440)">
+          <g class="gathering-person" fill="var(--c-triage)">
+            <use href="#metro-person-symbol">
+              <animateTransform attributeName="transform" type="translate" values="0,0; 12.0,-10.5; 24.0,-19.0; 36.0,-29.5; 48,-38" keyTimes="0; 0.25; 0.55; 0.8; 1" dur="4.2s" repeatCount="indefinite" begin="0.3s" />
+              <animate attributeName="opacity" values="0; 0.95; 0.95; 0.25; 0" keyTimes="0; 0.15; 0.75; 0.92; 1" dur="4.2s" repeatCount="indefinite" begin="0.3s" />
+            </use>
+          </g>
+          <g class="gathering-person" fill="var(--c-triage)">
+            <use href="#metro-person-symbol">
+              <animateTransform attributeName="transform" type="translate" values="0,0; 12.0,8.5; 24.0,19.0; 36.0,27.5; 48,38" keyTimes="0; 0.25; 0.55; 0.8; 1" dur="4.2s" repeatCount="indefinite" begin="2.3s" />
+              <animate attributeName="opacity" values="0; 0.95; 0.95; 0.25; 0" keyTimes="0; 0.15; 0.75; 0.92; 1" dur="4.2s" repeatCount="indefinite" begin="2.3s" />
+            </use>
+          </g>
+        </g>
+        <!-- 站點人流 [小人進站 (In)]: crowd-st-counsel-log at (980, 600) -->
+        <g class="station-crowd" id="crowd-st-counsel-log" transform="translate(1040, 600)">
+          <g class="gathering-person" fill="var(--c-feedback)">
+            <use href="#metro-person-symbol">
+              <animateTransform attributeName="transform" type="translate" values="-36,-32; -27.0,-25.0; -18.0,-16.0; -9.0,-9.0; 0,0" keyTimes="0; 0.25; 0.55; 0.8; 1" dur="4.5s" repeatCount="indefinite" begin="0.8s" />
+              <animate attributeName="opacity" values="0; 0.95; 0.95; 0.25; 0" keyTimes="0; 0.15; 0.75; 0.92; 1" dur="4.5s" repeatCount="indefinite" begin="0.8s" />
+            </use>
+          </g>
+        </g>
+        <!-- 站點人流 [小人進站 (In)]: crowd-st-recal at (560, 600) -->
+        <g class="station-crowd" id="crowd-st-recal" transform="translate(720, 600)">
+          <g class="gathering-person" fill="var(--c-feedback)">
+            <use href="#metro-person-symbol">
+              <animateTransform attributeName="transform" type="translate" values="36,-32; 27.0,-25.0; 18.0,-16.0; 9.0,-9.0; 0,0" keyTimes="0; 0.25; 0.55; 0.8; 1" dur="4.5s" repeatCount="indefinite" begin="1.5s" />
+              <animate attributeName="opacity" values="0; 0.95; 0.95; 0.25; 0" keyTimes="0; 0.15; 0.75; 0.92; 1" dur="4.5s" repeatCount="indefinite" begin="1.5s" />
+            </use>
+          </g>
+        </g>
+      </g>
+
+      <!-- ========================================== -->
+      <!-- 2.3 捷運真實列車組 (Metro Train Cars: 2-Car Sets) -->
+      <!-- ========================================== -->
+      <g id="metro-trains">
+        <!-- Train 1: 招生大考專列 (玫瑰紅) -->
+        <g class="metro-train" id="train-admissions">
+          <animateMotion dur="9s" repeatCount="indefinite" rotate="auto"><mpath href="#branch-admissions"/></animateMotion>
+          <polygon points="12,-4 34,-10 34,10 12,4" fill="#fef08a" opacity="0.22" />
+          <g transform="translate(5, 0)">
+            <rect x="-10" y="-5.5" width="20" height="11" rx="3.5" fill="var(--surface)" stroke="var(--c-admissions)" stroke-width="2" />
+            <rect x="-9" y="-2" width="18" height="4" fill="var(--c-admissions)" opacity="0.9" />
+            <path d="M 6,-3.5 L 9,-1.5 L 9,1.5 L 6,3.5 Z" fill="#38bdf8" opacity="0.95" />
+            <rect x="-2" y="-3.5" width="5" height="3" rx="0.8" fill="#e0f2fe" opacity="0.9" />
+            <rect x="-7.5" y="-3.5" width="4" height="3" rx="0.8" fill="#e0f2fe" opacity="0.9" />
+            <circle cx="9.5" cy="-2.5" r="1.3" fill="#fef08a" />
+            <circle cx="9.5" cy="2.5" r="1.3" fill="#fef08a" />
+          </g>
+          <line x1="-5" y1="0" x2="-8" y2="0" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" />
+          <g transform="translate(-17, 0)">
+            <rect x="-9" y="-5.5" width="18" height="11" rx="3" fill="var(--surface)" stroke="var(--c-admissions)" stroke-width="2" />
+            <rect x="-8" y="-2" width="16" height="4" fill="var(--c-admissions)" opacity="0.9" />
+            <rect x="-3" y="-3.5" width="5" height="3" rx="0.8" fill="#e0f2fe" opacity="0.9" />
+            <rect x="3" y="-3.5" width="4" height="3" rx="0.8" fill="#e0f2fe" opacity="0.9" />
+            <circle cx="-8.8" cy="-2.5" r="1.3" fill="#ef4444" />
+            <circle cx="-8.8" cy="2.5" r="1.3" fill="#ef4444" />
+          </g>
+        </g>
+
+        <!-- Train 2: 職涯 UCAN 專列 (晶紫羅蘭) -->
+        <g class="metro-train" id="train-career">
+          <animateMotion dur="7.5s" repeatCount="indefinite" rotate="auto"><mpath href="#branch-career"/></animateMotion>
+          <polygon points="12,-4 34,-10 34,10 12,4" fill="#fef08a" opacity="0.22" />
+          <g transform="translate(5, 0)">
+            <rect x="-10" y="-5.5" width="20" height="11" rx="3.5" fill="var(--surface)" stroke="var(--c-career)" stroke-width="2" />
+            <rect x="-9" y="-2" width="18" height="4" fill="var(--c-career)" opacity="0.9" />
+            <path d="M 6,-3.5 L 9,-1.5 L 9,1.5 L 6,3.5 Z" fill="#38bdf8" opacity="0.95" />
+            <rect x="-2" y="-3.5" width="5" height="3" rx="0.8" fill="#e0f2fe" opacity="0.9" />
+            <rect x="-7.5" y="-3.5" width="4" height="3" rx="0.8" fill="#e0f2fe" opacity="0.9" />
+            <circle cx="9.5" cy="-2.5" r="1.3" fill="#fef08a" />
+            <circle cx="9.5" cy="2.5" r="1.3" fill="#fef08a" />
+          </g>
+          <line x1="-5" y1="0" x2="-8" y2="0" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" />
+          <g transform="translate(-17, 0)">
+            <rect x="-9" y="-5.5" width="18" height="11" rx="3" fill="var(--surface)" stroke="var(--c-career)" stroke-width="2" />
+            <rect x="-8" y="-2" width="16" height="4" fill="var(--c-career)" opacity="0.9" />
+            <rect x="-3" y="-3.5" width="5" height="3" rx="0.8" fill="#e0f2fe" opacity="0.9" />
+            <rect x="3" y="-3.5" width="4" height="3" rx="0.8" fill="#e0f2fe" opacity="0.9" />
+            <circle cx="-8.8" cy="-2.5" r="1.3" fill="#ef4444" />
+            <circle cx="-8.8" cy="2.5" r="1.3" fill="#ef4444" />
+          </g>
+        </g>
+
+        <!-- Train 3: 歷程成績專列 (琥珀金黃) -->
+        <g class="metro-train" id="train-academic">
+          <animateMotion dur="8.5s" repeatCount="indefinite" rotate="auto"><mpath href="#branch-academic"/></animateMotion>
+          <polygon points="12,-4 34,-10 34,10 12,4" fill="#fef08a" opacity="0.22" />
+          <g transform="translate(5, 0)">
+            <rect x="-10" y="-5.5" width="20" height="11" rx="3.5" fill="var(--surface)" stroke="var(--c-academic)" stroke-width="2" />
+            <rect x="-9" y="-2" width="18" height="4" fill="var(--c-academic)" opacity="0.9" />
+            <path d="M 6,-3.5 L 9,-1.5 L 9,1.5 L 6,3.5 Z" fill="#38bdf8" opacity="0.95" />
+            <rect x="-2" y="-3.5" width="5" height="3" rx="0.8" fill="#e0f2fe" opacity="0.9" />
+            <rect x="-7.5" y="-3.5" width="4" height="3" rx="0.8" fill="#e0f2fe" opacity="0.9" />
+            <circle cx="9.5" cy="-2.5" r="1.3" fill="#fef08a" />
+            <circle cx="9.5" cy="2.5" r="1.3" fill="#fef08a" />
+          </g>
+          <line x1="-5" y1="0" x2="-8" y2="0" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" />
+          <g transform="translate(-17, 0)">
+            <rect x="-9" y="-5.5" width="18" height="11" rx="3" fill="var(--surface)" stroke="var(--c-academic)" stroke-width="2" />
+            <rect x="-8" y="-2" width="16" height="4" fill="var(--c-academic)" opacity="0.9" />
+            <rect x="-3" y="-3.5" width="5" height="3" rx="0.8" fill="#e0f2fe" opacity="0.9" />
+            <rect x="3" y="-3.5" width="4" height="3" rx="0.8" fill="#e0f2fe" opacity="0.9" />
+            <circle cx="-8.8" cy="-2.5" r="1.3" fill="#ef4444" />
+            <circle cx="-8.8" cy="2.5" r="1.3" fill="#ef4444" />
+          </g>
+        </g>
+
+        <!-- Train 4: 中央交付特急專列 (墨綠加強幹線) -->
+        <g class="metro-train" id="train-trunk">
+          <animateMotion dur="5s" repeatCount="indefinite" rotate="auto"><mpath href="#trunk-handoff"/></animateMotion>
+          <polygon points="12,-5 38,-12 38,12 12,5" fill="#fef08a" opacity="0.28" />
+          <g transform="translate(6, 0)">
+            <rect x="-11" y="-6.5" width="22" height="13" rx="4" fill="var(--surface)" stroke="var(--c-trunk-ir)" stroke-width="2.5" />
+            <rect x="-10" y="-2.5" width="20" height="5" fill="var(--c-trunk-ir)" opacity="0.95" />
+            <path d="M 7,-4 L 10.5,-1.5 L 10.5,1.5 L 7,4 Z" fill="#38bdf8" />
+            <rect x="-3" y="-4" width="6" height="3.5" rx="0.8" fill="#ffffff" />
+            <rect x="-8.5" y="-4" width="4" height="3.5" rx="0.8" fill="#ffffff" />
+            <circle cx="10.5" cy="-3" r="1.4" fill="#fef08a" />
+            <circle cx="10.5" cy="3" r="1.4" fill="#fef08a" />
+          </g>
+          <line x1="-5" y1="0" x2="-9" y2="0" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round" />
+          <g transform="translate(-18, 0)">
+            <rect x="-10" y="-6.5" width="20" height="13" rx="3.5" fill="var(--surface)" stroke="var(--c-trunk-ir)" stroke-width="2.5" />
+            <rect x="-9" y="-2.5" width="18" height="5" fill="var(--c-trunk-ir)" opacity="0.95" />
+            <rect x="-4" y="-4" width="6" height="3.5" rx="0.8" fill="#ffffff" />
+            <rect x="3.5" y="-4" width="5" height="3.5" rx="0.8" fill="#ffffff" />
+            <circle cx="-9.8" cy="-3" r="1.4" fill="#ef4444" />
+            <circle cx="-9.8" cy="3" r="1.4" fill="#ef4444" />
+          </g>
+        </g>
+
+        <!-- Train 5: 課務期中預警快車 (天藍) -->
+        <g class="metro-train" id="train-warning">
+          <animateMotion dur="8.5s" repeatCount="indefinite" rotate="auto"><mpath href="#branch-warning"/></animateMotion>
+          <polygon points="12,-4 34,-10 34,10 12,4" fill="#fef08a" opacity="0.22" />
+          <g transform="translate(5, 0)">
+            <rect x="-10" y="-5.5" width="20" height="11" rx="3.5" fill="var(--surface)" stroke="var(--c-warning)" stroke-width="2" />
+            <rect x="-9" y="-2" width="18" height="4" fill="var(--c-warning)" opacity="0.9" />
+            <path d="M 6,-3.5 L 9,-1.5 L 9,1.5 L 6,3.5 Z" fill="#38bdf8" />
+            <rect x="-2" y="-3.5" width="5" height="3" rx="0.8" fill="#e0f2fe" />
+            <rect x="-7.5" y="-3.5" width="4" height="3" rx="0.8" fill="#e0f2fe" />
+            <circle cx="9.5" cy="-2.5" r="1.3" fill="#fef08a" />
+            <circle cx="9.5" cy="2.5" r="1.3" fill="#fef08a" />
+          </g>
+          <line x1="-5" y1="0" x2="-8" y2="0" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" />
+          <g transform="translate(-17, 0)">
+            <rect x="-9" y="-5.5" width="18" height="11" rx="3" fill="var(--surface)" stroke="var(--c-warning)" stroke-width="2" />
+            <rect x="-8" y="-2" width="16" height="4" fill="var(--c-warning)" opacity="0.9" />
+            <rect x="-3" y="-3.5" width="5" height="3" rx="0.8" fill="#e0f2fe" />
+            <rect x="3" y="-3.5" width="4" height="3" rx="0.8" fill="#e0f2fe" />
+            <circle cx="-8.8" cy="-2.5" r="1.3" fill="#ef4444" />
+            <circle cx="-8.8" cy="2.5" r="1.3" fill="#ef4444" />
+          </g>
+        </g>
+
+        <!-- Train 6: 授課出勤點名巡迴車 (翡翠綠) -->
+        <g class="metro-train" id="train-attend">
+          <animateMotion dur="7s" repeatCount="indefinite" rotate="auto"><mpath href="#branch-attend"/></animateMotion>
+          <polygon points="12,-4 34,-10 34,10 12,4" fill="#fef08a" opacity="0.22" />
+          <g transform="translate(5, 0)">
+            <rect x="-10" y="-5.5" width="20" height="11" rx="3.5" fill="var(--surface)" stroke="var(--c-attend)" stroke-width="2" />
+            <rect x="-9" y="-2" width="18" height="4" fill="var(--c-attend)" opacity="0.9" />
+            <path d="M 6,-3.5 L 9,-1.5 L 9,1.5 L 6,3.5 Z" fill="#38bdf8" />
+            <rect x="-2" y="-3.5" width="5" height="3" rx="0.8" fill="#e0f2fe" />
+            <rect x="-7.5" y="-3.5" width="4" height="3" rx="0.8" fill="#e0f2fe" />
+            <circle cx="9.5" cy="-2.5" r="1.3" fill="#fef08a" />
+            <circle cx="9.5" cy="2.5" r="1.3" fill="#fef08a" />
+          </g>
+          <line x1="-5" y1="0" x2="-8" y2="0" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" />
+          <g transform="translate(-17, 0)">
+            <rect x="-9" y="-5.5" width="18" height="11" rx="3" fill="var(--surface)" stroke="var(--c-attend)" stroke-width="2" />
+            <rect x="-8" y="-2" width="16" height="4" fill="var(--c-attend)" opacity="0.9" />
+            <rect x="-3" y="-3.5" width="5" height="3" rx="0.8" fill="#e0f2fe" />
+            <rect x="3" y="-3.5" width="4" height="3" rx="0.8" fill="#e0f2fe" />
+            <circle cx="-8.8" cy="-2.5" r="1.3" fill="#ef4444" />
+            <circle cx="-8.8" cy="2.5" r="1.3" fill="#ef4444" />
+          </g>
+        </g>
+
+        <!-- Train 7: 新 ee-class 信號列車 (皇家寶藍) -->
+        <g class="metro-train" id="train-lms">
+          <animateMotion dur="9s" repeatCount="indefinite" rotate="auto"><mpath href="#branch-lms"/></animateMotion>
+          <polygon points="12,-4 34,-10 34,10 12,4" fill="#fef08a" opacity="0.22" />
+          <g transform="translate(5, 0)">
+            <rect x="-10" y="-5.5" width="20" height="11" rx="3.5" fill="var(--surface)" stroke="var(--c-lms)" stroke-width="2" />
+            <rect x="-9" y="-2" width="18" height="4" fill="var(--c-lms)" opacity="0.9" />
+            <path d="M 6,-3.5 L 9,-1.5 L 9,1.5 L 6,3.5 Z" fill="#38bdf8" />
+            <rect x="-2" y="-3.5" width="5" height="3" rx="0.8" fill="#e0f2fe" />
+            <rect x="-7.5" y="-3.5" width="4" height="3" rx="0.8" fill="#e0f2fe" />
+            <circle cx="9.5" cy="-2.5" r="1.3" fill="#fef08a" />
+            <circle cx="9.5" cy="2.5" r="1.3" fill="#fef08a" />
+          </g>
+          <line x1="-5" y1="0" x2="-8" y2="0" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" />
+          <g transform="translate(-17, 0)">
+            <rect x="-9" y="-5.5" width="18" height="11" rx="3" fill="var(--surface)" stroke="var(--c-lms)" stroke-width="2" />
+            <rect x="-8" y="-2" width="16" height="4" fill="var(--c-lms)" opacity="0.9" />
+            <rect x="-3" y="-3.5" width="5" height="3" rx="0.8" fill="#e0f2fe" />
+            <rect x="3" y="-3.5" width="4" height="3" rx="0.8" fill="#e0f2fe" />
+            <circle cx="-8.8" cy="-2.5" r="1.3" fill="#ef4444" />
+            <circle cx="-8.8" cy="2.5" r="1.3" fill="#ef4444" />
+          </g>
+        </g>
+
+        <!-- Train 8: 閉環成效回流特急 (松石綠) -->
+        <g class="metro-train" id="train-feedback">
+          <animateMotion dur="15s" repeatCount="indefinite" rotate="auto"><mpath href="#branch-feedback"/></animateMotion>
+          <polygon points="12,-4 34,-10 34,10 12,4" fill="#fef08a" opacity="0.22" />
+          <g transform="translate(5, 0)">
+            <rect x="-10" y="-5.5" width="20" height="11" rx="3.5" fill="var(--surface)" stroke="var(--c-feedback)" stroke-width="2" />
+            <rect x="-9" y="-2" width="18" height="4" fill="var(--c-feedback)" opacity="0.9" />
+            <path d="M 6,-3.5 L 9,-1.5 L 9,1.5 L 6,3.5 Z" fill="#38bdf8" />
+            <rect x="-2" y="-3.5" width="5" height="3" rx="0.8" fill="#e0f2fe" />
+            <rect x="-7.5" y="-3.5" width="4" height="3" rx="0.8" fill="#e0f2fe" />
+            <circle cx="9.5" cy="-2.5" r="1.3" fill="#fef08a" />
+            <circle cx="9.5" cy="2.5" r="1.3" fill="#fef08a" />
+          </g>
+          <line x1="-5" y1="0" x2="-8" y2="0" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" />
+          <g transform="translate(-17, 0)">
+            <rect x="-9" y="-5.5" width="18" height="11" rx="3" fill="var(--surface)" stroke="var(--c-feedback)" stroke-width="2" />
+            <rect x="-8" y="-2" width="16" height="4" fill="var(--c-feedback)" opacity="0.9" />
+            <rect x="-3" y="-3.5" width="5" height="3" rx="0.8" fill="#e0f2fe" />
+            <rect x="3" y="-3.5" width="4" height="3" rx="0.8" fill="#e0f2fe" />
+            <circle cx="-8.8" cy="-2.5" r="1.3" fill="#ef4444" />
+            <circle cx="-8.8" cy="2.5" r="1.3" fill="#ef4444" />
+          </g>
+        </g>
+      </g>
+
+      <!-- ========================================== -->
+      <!-- 3. 專屬端點處室標牌 (Terminus Boxes)          -->
+      <!-- ========================================== -->
+      <g class="terminus-group">
+        <!-- Region Titles (Y = 32 to 68) -->
+        <rect x="50" y="32" width="480" height="36" rx="8" fill="var(--surface)" stroke="var(--line-border)" />
+        <text x="66" y="55" font-size="14.5" font-weight="900" fill="var(--ink)">【慢迴圈】學期期末宏觀特徵匯流 (IR Office)</text>
+        <text x="475" y="55" font-size="11" font-family="var(--font-mono)" fill="var(--muted)">TERM s</text>
+
+        <!-- PIDS: Metro OCC 行車即時資訊看板 (Center Gap at X=545~835, Y=32~68) -->
+        <g class="pids-board" transform="translate(545, 32)">
+          <rect x="0" y="0" width="290" height="36" rx="8" fill="var(--surface-alt)" stroke="var(--line-border)" stroke-width="1.5" />
+          <circle cx="16" cy="18" r="4.5" fill="#22c55e" filter="url(#glow)">
+            <animate attributeName="opacity" values="1;0.35;1" dur="2s" repeatCount="indefinite" />
+          </circle>
+          <text x="28" y="15" font-family="var(--font-mono)" font-size="9" font-weight="700" fill="#22c55e">StayOn OCC • ON TIME</text>
+          <text x="28" y="27" font-family="var(--font-sans)" font-size="10.5" font-weight="700" fill="var(--ink)">StayOn 雙迴圈 6 處室列車運轉中</text>
+          <g transform="translate(262, 13)">
+            <rect x="0" y="0" width="16" height="10" rx="2" fill="var(--c-trunk-ir)" />
+            <circle cx="4" cy="10" r="1.5" fill="#94a3b8" />
+            <circle cx="12" cy="10" r="1.5" fill="#94a3b8" />
+            <rect x="2" y="2" width="4" height="4" rx="0.5" fill="#ffffff" />
+            <rect x="8" y="2" width="6" height="4" rx="0.5" fill="#ffffff" />
+          </g>
+        </g>
+
+        <rect x="850" y="32" width="500" height="36" rx="8" fill="var(--surface)" stroke="var(--line-border)" />
+        <text x="866" y="55" font-size="14.5" font-weight="900" fill="var(--ink)">【快迴圈】學期中各處室即時信號 (Weeks 1~18)</text>
+        <text x="1305" y="55" font-size="11" font-family="var(--font-mono)" fill="var(--muted)">TERM s+1</text>
+
+        <!-- Left Line Terminus Labels (X = 45 to 170, safely to the left of tracks) -->
+        <rect x="45" y="142" width="125" height="36" rx="6" fill="var(--surface)" stroke="var(--c-admissions)" stroke-width="2" />
+        <text x="107" y="165" font-size="12" font-weight="700" fill="var(--c-admissions)" text-anchor="middle">教務處 招生組</text>
+
+        <rect x="45" y="262" width="125" height="36" rx="6" fill="var(--surface)" stroke="var(--c-career)" stroke-width="2" />
+        <text x="107" y="285" font-size="12" font-weight="700" fill="var(--c-career)" text-anchor="middle">學務處 職涯中心</text>
+
+        <rect x="45" y="382" width="125" height="36" rx="6" fill="var(--surface)" stroke="var(--c-academic)" stroke-width="2" />
+        <text x="107" y="405" font-size="12" font-weight="700" fill="var(--c-academic)" text-anchor="middle">教務處 註冊組</text>
+
+        <!-- Feedback Loop Title (Y = 660, in completely free space) -->
+        <text x="880" y="660" font-size="13" font-weight="700" fill="var(--c-feedback)" text-anchor="middle">◀ 閉環回饋幹線：輔導晤談處遇紀錄 ➔ 次學期續讀/休退結果對齊 ➔ IR 模型參數校正</text>
+      </g>
+
+      <!-- ========================================== -->
+      <!-- 4. 車站節點 (Station Nodes: Zero Collisions)   -->
+      <!-- ========================================== -->
+
+      <!-- S-01: 入學管道與身分站 -->
+      <g class="station-node cat-admissions" id="st-route" data-id="st-route" transform="translate(270, 160)">
+        <circle class="hit-area" r="36" />
+        <circle class="station-circle" r="11" stroke="var(--c-admissions)" />
+        <circle cx="0" cy="0" r="4.5" fill="var(--c-admissions)" pointer-events="none" />
+        <g class="station-label-group">
+          <text class="station-name" x="0" y="-24" text-anchor="middle">入學管道與背景</text>
+          <rect x="-18" y="18" width="36" height="15" rx="4" fill="var(--c-admissions)" />
+          <text class="station-code-pill" x="0" y="25.5">S-01</text>
+        </g>
+      </g>
+
+      <!-- S-02: 大考學科常模剖面站 -->
+      <g class="station-node cat-admissions" id="st-exam" data-id="st-exam" transform="translate(440, 160)">
+        <circle class="hit-area" r="36" />
+        <circle class="station-circle" r="12" stroke="var(--c-admissions)" stroke-width="4.5" />
+        <circle cx="0" cy="0" r="5" fill="var(--c-admissions)" pointer-events="none" />
+        <g class="station-label-group">
+          <text class="station-name" x="0" y="-24" text-anchor="middle">大考學科常模剖面</text>
+          <rect x="-18" y="18" width="36" height="15" rx="4" fill="var(--c-admissions)" />
+          <text class="station-code-pill" x="0" y="25.5">S-02</text>
+        </g>
+      </g>
+
+      <!-- S-03: UCAN 職業興趣施測站 -->
+      <g class="station-node cat-career" id="st-ucan" data-id="st-ucan" transform="translate(355, 280)">
+        <circle class="hit-area" r="36" />
+        <circle class="station-circle" r="11" stroke="var(--c-career)" />
+        <circle cx="0" cy="0" r="4.5" fill="var(--c-career)" pointer-events="none" />
+        <g class="station-label-group">
+          <text class="station-name" x="0" y="-24" text-anchor="middle">UCAN 職業興趣施測</text>
+          <rect x="-18" y="18" width="36" height="15" rx="4" fill="var(--c-career)" />
+          <text class="station-code-pill" x="0" y="25.5">S-03</text>
+        </g>
+      </g>
+
+      <!-- S-04: 歷年學業成績與預警站 (Text safely below track at y=36) -->
+      <g class="station-node cat-academic" id="st-grade" data-id="st-grade" transform="translate(355, 400)">
+        <circle class="hit-area" r="36" />
+        <circle class="station-circle" r="11" stroke="var(--c-academic)" />
+        <circle cx="0" cy="0" r="4.5" fill="var(--c-academic)" pointer-events="none" />
+        <g class="station-label-group">
+          <text class="station-name" x="0" y="34" text-anchor="middle">歷年學業成績與預警</text>
+          <rect x="-18" y="-30" width="36" height="15" rx="4" fill="var(--c-academic)" />
+          <text class="station-code-pill" x="0" y="-22.5">S-04</text>
+        </g>
+      </g>
+
+      <!-- IR 總站 (Hub 1: at 580, 280) -->
+      <g class="station-node transfer cat-academic cat-admissions cat-career" id="st-model" data-id="st-model" transform="translate(580, 280)">
+        <circle class="hit-area" r="44" />
+        <rect class="transfer-pill" x="-30" y="-30" width="60" height="60" stroke="var(--c-trunk-ir)" filter="url(#shadow)" />
+        <circle cx="0" cy="0" r="13" fill="var(--c-trunk-ir)" />
+        <circle cx="0" cy="0" r="5" fill="#ffffff" pointer-events="none" />
+        <g class="station-label-group">
+          <text class="station-name" x="0" y="-40" text-anchor="middle">IR 期末模型總站</text>
+          <text class="station-sub" x="0" y="46" fill="var(--c-trunk-ir)" text-anchor="middle">產出 p_slow 底分</text>
+        </g>
+      </g>
+
+      <!-- 交接閘口 (Hub 2: at 750, 280) -->
+      <g class="station-node transfer" id="hub-handoff" data-id="hub-handoff" transform="translate(750, 280)">
+        <circle class="hit-area" r="40" />
+        <rect class="transfer-pill" x="-25" y="-32" width="50" height="64" stroke="var(--c-trunk-ir)" filter="url(#shadow)" />
+        <circle cx="0" cy="-14" r="7.5" fill="var(--c-trunk-ir)" stroke="#fff" stroke-width="2" pointer-events="none" />
+        <circle cx="0" cy="14" r="7.5" fill="var(--c-warning)" stroke="#fff" stroke-width="2" pointer-events="none" />
+        <g class="station-label-group">
+          <text class="station-name" x="0" y="-40" text-anchor="middle">期初資料交接閘口</text>
+          <text class="station-sub" x="0" y="46" fill="var(--muted)" text-anchor="middle">HUB-A: 雜湊交付</text>
+        </g>
+      </g>
+
+      <!-- F-01: 第 9-10 週 期中預警站 (教務處 課務組) -->
+      <g class="station-node cat-interm" id="st-mid" data-id="st-mid" transform="translate(1075, 160)">
+        <circle class="hit-area" r="36" />
+        <circle class="station-circle" r="12" stroke="var(--c-warning)" stroke-width="4.5" />
+        <circle cx="0" cy="0" r="5" fill="var(--c-warning)" pointer-events="none" />
+        <g class="station-label-group">
+          <text class="station-name" x="0" y="-24" text-anchor="middle" fill="var(--c-warning)">第 9-10 週 期中預警</text>
+          <rect x="-18" y="18" width="36" height="15" rx="4" fill="var(--c-warning)" />
+          <text class="station-code-pill" x="0" y="25.5">F-01</text>
+        </g>
+      </g>
+
+      <!-- F-02: 第 6 週 出勤初檢站 (授課教師 / 點名系統) -->
+      <g class="station-node cat-interm" id="st-att6" data-id="st-att6" transform="translate(940, 280)">
+        <circle class="hit-area" r="36" />
+        <circle class="station-circle" r="11" stroke="var(--c-attend)" />
+        <circle cx="0" cy="0" r="4.5" fill="var(--c-attend)" pointer-events="none" />
+        <g class="station-label-group">
+          <text class="station-name" x="0" y="-24" text-anchor="middle">第 6 週 出勤初檢</text>
+          <rect x="-24" y="18" width="48" height="15" rx="4" fill="var(--c-attend)" />
+          <text class="station-code-pill" x="0" y="25.5">&lt; 70%</text>
+        </g>
+      </g>
+
+      <!-- F-03: 第 12 週 出勤重警站 (授課教師 / 點名系統) -->
+      <g class="station-node cat-interm" id="st-att12" data-id="st-att12" transform="translate(1110, 280)">
+        <circle class="hit-area" r="36" />
+        <circle class="station-circle" r="12" stroke="var(--c-attend)" stroke-width="4.5" />
+        <circle cx="0" cy="0" r="5" fill="var(--c-attend)" pointer-events="none" />
+        <g class="station-label-group">
+          <text class="station-name" x="0" y="-24" text-anchor="middle">第 12 週 出勤重警</text>
+          <rect x="-24" y="18" width="48" height="15" rx="4" fill="var(--c-attend)" />
+          <text class="station-code-pill" x="0" y="25.5">&lt; 50%</text>
+        </g>
+      </g>
+
+      <!-- F-04: 第 8 週 小考作業常模站 (新 ee-class 系統) -->
+      <g class="station-node cat-interm" id="st-quiz" data-id="st-quiz" transform="translate(1010, 400)">
+        <circle class="hit-area" r="36" />
+        <circle class="station-circle" r="11" stroke="var(--c-lms)" />
+        <circle cx="0" cy="0" r="4.5" fill="var(--c-lms)" pointer-events="none" />
+        <g class="station-label-group">
+          <text class="station-name" x="0" y="34" text-anchor="middle">第 8 週 小考作業常模</text>
+          <rect x="-18" y="-30" width="36" height="15" rx="4" fill="var(--c-lms)" />
+          <text class="station-code-pill" x="0" y="-22.5">F-04</text>
+        </g>
+      </g>
+
+      <!-- F-05: 第 12 週 新 ee-class 平台沉寂告警站 (新 ee-class 系統) -->
+      <g class="station-node cat-interm" id="st-lms" data-id="st-lms" transform="translate(1175, 400)">
+        <circle class="hit-area" r="36" />
+        <circle class="station-circle" r="12" stroke="var(--c-lms)" stroke-width="4.5" />
+        <circle cx="0" cy="0" r="5" fill="var(--c-lms)" pointer-events="none" />
+        <g class="station-label-group">
+          <text class="station-name" x="0" y="34" text-anchor="middle">第 12 週 平台沉寂告警</text>
+          <rect x="-24" y="-30" width="48" height="15" rx="4" fill="var(--c-lms)" />
+          <text class="station-code-pill" x="0" y="-22.5">14天未登</text>
+        </g>
+      </g>
+
+      <!-- IR 快迴圈匯流計算站 (Hub 3: at 1290, 280) - IR holds the key and merges fast-loop data -->
+      <g class="station-node transfer cat-interm cat-academic" id="st-irmerge" data-id="st-irmerge" transform="translate(1290, 280)">
+        <circle class="hit-area" r="44" />
+        <rect class="transfer-pill" x="-30" y="-30" width="60" height="60" stroke="var(--c-trunk-ir)" filter="url(#shadow)" />
+        <circle cx="0" cy="0" r="13" fill="var(--c-trunk-ir)" />
+        <circle cx="0" cy="0" r="5" fill="#ffffff" pointer-events="none" />
+        <g class="station-label-group">
+          <text class="station-name" x="0" y="-40" text-anchor="middle">IR 快迴圈匯流計算站</text>
+          <text class="station-sub" x="44" y="4" fill="var(--c-trunk-ir)" text-anchor="start">算出 p_fast</text>
+        </g>
+      </g>
+
+      <!-- 快迴圈名單總站 (Hub 4: at 1290, 440) -->
+      <g class="station-node transfer cat-interm cat-feedback" id="st-list" data-id="st-list" transform="translate(1290, 440)">
+        <circle class="hit-area" r="44" />
+        <rect class="transfer-pill" x="-30" y="-30" width="60" height="60" stroke="var(--c-triage)" filter="url(#shadow)" />
+        <circle cx="0" cy="0" r="13" fill="var(--c-triage)" />
+        <circle cx="0" cy="0" r="5" fill="#ffffff" pointer-events="none" />
+        <g class="station-label-group">
+          <text class="station-name" x="0" y="50" text-anchor="middle">三級關懷名單決策總站</text>
+          <text class="station-sub" x="0" y="66" fill="var(--c-triage)" text-anchor="middle">高 / 觀察 / 低分流</text>
+        </g>
+      </g>
+
+      <!-- FB-01: 輔導晤談與處遇記錄站 (at 980, 600) -->
+      <g class="station-node cat-feedback" id="st-counsel-log" data-id="st-counsel-log" transform="translate(1040, 600)">
+        <circle class="hit-area" r="36" />
+        <circle class="station-circle" r="11" stroke="var(--c-feedback)" />
+        <circle cx="0" cy="0" r="4.5" fill="var(--c-feedback)" pointer-events="none" />
+        <g class="station-label-group">
+          <text class="station-name" x="0" y="-24" text-anchor="middle">輔導晤談與處遇紀錄</text>
+          <rect x="-20" y="18" width="40" height="15" rx="4" fill="var(--c-feedback)" />
+          <text class="station-code-pill" x="0" y="25.5">FB-01</text>
+        </g>
+      </g>
+
+      <!-- FB-02: 次學期續讀對齊與參數重新校正站 (at 560, 600) -->
+      <g class="station-node cat-feedback" id="st-recal" data-id="st-recal" transform="translate(720, 600)">
+        <circle class="hit-area" r="38" />
+        <circle class="station-circle" r="12" stroke="var(--c-feedback)" stroke-width="4.5" />
+        <circle cx="0" cy="0" r="5" fill="var(--c-feedback)" pointer-events="none" />
+        <g class="station-label-group">
+          <text class="station-name" x="0" y="-24" text-anchor="middle">次學期續讀對齊與閉環校正</text>
+          <rect x="-20" y="18" width="40" height="15" rx="4" fill="var(--c-feedback)" />
+          <text class="station-code-pill" x="0" y="25.5">FB-02</text>
+        </g>
+      </g>
+
+      <!-- Risk-change simulation overlay (filled by sim script) -->
+      <g id="sim-layer" pointer-events="none"></g>
+
+    </svg>
+
+    <!-- Risk-change simulation control panel -->
+    <div class="sim-panel" id="sim-panel" hidden>
+      <div class="sim-head">
+        <span class="sim-stage-pill" id="sim-stage-pill">1 / 5</span>
+        <span class="sim-title" id="sim-title"></span>
+        <button class="sim-close" id="sim-min" title="收合 / 展開">—</button>
+        <button class="sim-close" id="sim-close" title="關閉模組">✕</button>
+      </div>
+      <div class="sim-note">模擬示意：分數與學生資料皆為隨機生成，非真實資料或模型輸出</div>
+      <div class="sim-desc" id="sim-desc"></div>
+      <div class="sim-sub" id="sim-sub"></div>
+      <div class="sim-table" id="sim-table"></div>
+      <div class="sim-controls">
+        <button id="sim-prev" title="上一階段">◀ 上一階段</button>
+        <button id="sim-pause" title="暫停 / 繼續">⏸ 暫停</button>
+        <button id="sim-next" title="下一階段">下一階段 ▶</button>
+        <button id="sim-reroll" title="重新抽樣 5 位學生">🎲 重抽</button>
+      </div>
+    </div>
+
+    <!-- Floating Tab to Re-open Drawer when collapsed -->
+    <button id="btn-open-drawer" class="drawer-floating-tab" style="display:none;" title="展開右側說明欄">
+      <span>📑</span> 展開詳細說明
+    </button>
+
+    <!-- Legend Dock (Horizontal Bottom Toolbar: Never squeezed, never hidden) -->
+    <div class="legend-dock" id="legend-dock">
+      <div class="legend-dock-header">
+        <div class="legend-dock-title" id="legend-dock-title-btn" title="點擊展開/收合圖例">
+          <span>📌 資料分流圖例 (6 處室)</span>
+          <span style="font-family:var(--font-mono);font-size:10px;color:var(--muted);background:var(--surface-alt);padding:2px 6px;border-radius:4px;">點擊直接篩選</span>
+        </div>
+        <button class="legend-dock-toggle" id="btn-toggle-legend-dock" title="收合/展開圖例列">收合 ▾</button>
+      </div>
+      <div class="legend-dock-body" id="legend-dock-body">
+        <div class="legend-chip" data-filter="cat-admissions" title="篩選：入學與大考資料">
+          <span class="chip-dot" style="background:var(--c-admissions)"></span>
+          <span>入學與大考資料</span>
+        </div>
+        <div class="legend-chip" data-filter="cat-interm" title="篩選：教務處課務組（期中預警 / 出勤 / ee-class）">
+          <span class="chip-dot" style="background:var(--c-warning)"></span>
+          <span>課務組 快迴圈（預警 / 出勤 / ee-class）</span>
+        </div>
+        <div class="legend-chip" data-filter="cat-career" title="篩選：職涯興趣 (UCAN)">
+          <span class="chip-dot" style="background:var(--c-career)"></span>
+          <span>職涯興趣 (UCAN)</span>
+        </div>
+        <div class="legend-chip" data-filter="cat-academic" title="篩選：註冊歷程與成績">
+          <span class="chip-dot" style="background:var(--c-academic)"></span>
+          <span>註冊歷程與成績</span>
+        </div>
+        <div class="legend-chip" data-filter="cat-academic" title="篩選：校務研究 IR 總站">
+          <span class="chip-dot" style="background:var(--c-trunk-ir)"></span>
+          <span>校務研究 IR 總站</span>
+        </div>
+        <div class="legend-chip" data-filter="cat-feedback" title="篩選：學輔中心 / 導師室">
+          <span class="chip-dot" style="background:var(--c-triage)"></span>
+          <span>學輔中心 / 導師室</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail Information Drawer (Collapsible) -->
+  <aside class="detail-drawer" id="detail-drawer" aria-label="車站詳細說明">
+    <div class="drawer-header">
+      <div>
+        <span class="drawer-line-badge" id="d-badge" style="background:var(--c-admissions)">教務處 招生資料線</span>
+        <h2 class="drawer-title" id="d-title">大考學科常模剖面</h2>
+        <div class="drawer-eng" id="d-eng">S-02 • Exam Profile Shape</div>
+      </div>
+      <button id="btn-close-drawer" class="drawer-close-btn" title="收合詳細說明欄">✕</button>
+    </div>
+
+    <div class="drawer-content" id="d-content">
+      <!-- Dynamic Content Populated by JS -->
+    </div>
+  </aside>
+</div>
+
+<script>
+// Station Database matching project requirements
+const METRO_DATA = {
+  "st-exam": {
+    code: "S-02",
+    cat: "cat-admissions",
+    badgeColor: "var(--c-admissions)",
+    badgeText: "入學與大考資料 (教務處 招生組)",
+    name: "大考學科常模剖面",
+    eng: "Entrance Exam Profile Shape & Distance",
+    owner: "教務處 招生組 / 校務研究辦公室",
+    timing: "新生入學即取得（長效靜態特徵）",
+    concept: "從原本只看『加權總分 z（學業程度）』，進一步挖掘『各學科常模幾何剖面』。入學即可確定，不含未來資訊洩漏（No Data Leakage），屬於高解釋力的早期志趣與能力契合度特徵。",
+    bullets: [
+      "<b>科目形狀剖面（Profile Shape）</b>：分析國、英、數、自、社各科常模標準化分數（z-score）之高低位階分佈。",
+      "<b>各科差距（Discrepancy）</b>：強弱科分化程度（max z - min z），檢視是否有特定科目明顯落後或極端偏科。",
+      "<b>理文傾角（STEM vs Lang/Social Tilt）</b>：數學、自然科平均 z 減去 國文、英文、社會科平均 z，量化文理傾向偏離度。",
+      "<b>與該系典型生距離（Dept Distance）</b>：計算與該系同管道歷屆錄取生中位數剖面之距離（1 - Pearson r），衡量志趣適應力。"
+    ],
+    showProfileChart: true
+  },
+  "st-route": {
+    code: "S-01",
+    cat: "cat-admissions",
+    badgeColor: "var(--c-admissions)",
+    badgeText: "入學與大考資料 (教務處 招生組)",
+    name: "入學管道與背景",
+    eng: "Admission Route & Demographics",
+    owner: "教務處 招生組 / 註冊組",
+    timing: "新生入學即取得",
+    concept: "代表學生進入大學的起點背景，提供先驗風險基準校準。",
+    bullets: [
+      "<b>入學管道分組</b>：繁星推薦、個人申請、分發入學、特殊選才、轉學入學等管道分組標記。",
+      "<b>錄取志願序與年齡</b>：第一志願 vs 非前三志願錄取；非應屆畢業入學年齡指標。",
+      "<b>身分變動歷程</b>：轉系生、雙主修或外校轉入身分標記。"
+    ]
+  },
+  "st-ucan": {
+    code: "S-03",
+    cat: "cat-career",
+    badgeColor: "var(--c-career)",
+    badgeText: "職涯興趣資料 (學務處 職涯發展中心)",
+    name: "UCAN 職業興趣施測",
+    eng: "UCAN Career Interests & Congruence",
+    owner: "學務處 職涯發展中心",
+    timing: "入學施測，每學期更新最新施測結果",
+    concept: "透過教育部 UCAN 平台 Holland 六型職業興趣，衡量學生個人志向與所就讀系所核心培育目標之契合度。",
+    bullets: [
+      "<b>Holland 六型向量距離</b>：學生個人興趣向量與本系典型剖面之幾何距離。",
+      "<b>興趣分化程度（Differentiation）</b>：是否有明確突出的興趣領域，或是六型扁平缺乏方向。",
+      "<b>嚴格時間戳約束</b>：嚴格只使用預測學期以前完成的施測，無未來資料外洩。"
+    ]
+  },
+  "st-grade": {
+    code: "S-04",
+    cat: "cat-academic",
+    badgeColor: "var(--c-academic)",
+    badgeText: "歷年學業與預警 (教務處 註冊組)",
+    name: "歷年學業成績與預警",
+    eng: "Academic Records & Cumulative Warnings",
+    owner: "教務處 註冊組",
+    timing: "每學期期末成績確定後 2 週內",
+    concept: "學業挫折往往是退學的前兆。結合長期的成績變化趨勢與修課適應程度，構成慢迴圈核心學業特徵。",
+    bullets: [
+      "<b>GPA 軌跡與變化量</b>：當期 GPA、累計 GPA 以及與前一學期之 ΔGPA 變化量。",
+      "<b>不及格學分佔比</b>：當期不及格學分比率、核心必修課程被當次數。",
+      "<b>學業預警紀錄</b>：累計二一或單科預警次數、修課學分過低或大量退選 (W) 紀錄。"
+    ]
+  },
+  "st-model": {
+    code: "IR-CORE",
+    cat: "cat-academic",
+    badgeColor: "var(--c-trunk-ir)",
+    badgeText: "校務研究 IR 總站",
+    name: "IR 期末風險模型總站",
+    eng: "IR Office Term Risk Model Engine",
+    owner: "校務研究辦公室 (IR Office)",
+    timing: "每學期期末成績底定後 2 週內運算",
+    concept: "慢迴圈三大資料類型（招生大考、職涯、學業成績）在此匯流！IR 透過嚴格的逐年滾動驗證（Rolling-window Validation）訓練機器學習模型，輸出每位在學生基線風險分數 p_slow。",
+    bullets: [
+      "<b>多特徵融合</b>：整合招生背景、大考各科剖面、UCAN 志趣與歷年 GPA。",
+      "<b>逐年滾動評估</b>：模型嚴格只使用歷史年度訓練，預測下一學年，以 PR-AUC 監控品質。",
+      "<b>隱私雜湊產出</b>：以加鹽指紋（fe07ac70）產生去識別化 pid，產出 slow.csv (pid, term, p_slow) 傳輸給交接閘口。"
+    ]
+  },
+  "hub-handoff": {
+    code: "HUB-A",
+    cat: "cat-academic",
+    badgeColor: "var(--c-trunk-ir)",
+    badgeText: "中央幹線・資料交接閘口",
+    name: "期初資料交接閘口",
+    eng: "Week 0 Handoff Gate (IR ➔ 快迴圈)",
+    owner: "IR 辦公室（保管對照金鑰）",
+    timing: "每學期開學前 / 第 0 週 (Week 0)",
+    concept: "慢迴圈（IR）算出的基準風險分數 p_slow 以雜湊編號保存在 IR，作為快迴圈的起點；學期中各處室資料回到 IR 匯流，分數不外流至處室或導師端。",
+    bullets: [
+      "<b>交付檔規範 (slow.csv)</b>：包含 pid, term, p_slow，採用 UTF-8 BOM 格式，pid 不含任何可識別學生明文。",
+      "<b>金鑰留在 IR</b>：學號與雜湊編號的對照金鑰僅由 IR 指定人員保管；學輔與導師端只收到最終三級名單，無法倒查全校分數。",
+      "<b>附一頁技術備忘錄</b>：載明模型版本 (run_id)、全校基線退學率及最新折次 PR-AUC 表現。"
+    ]
+  },
+  "st-mid": {
+    code: "F-01",
+    cat: "cat-interm",
+    badgeColor: "var(--c-warning)",
+    badgeText: "課務期中預警 (教務處 課務組)",
+    name: "第 9-10 週 教務期中預警站",
+    eng: "Week 9-10 Midterm Academic Warning",
+    owner: "教務處 課務組",
+    timing: "學期第 9–10 週",
+    concept: "快迴圈中權重極高的實質學業信號。授課教師於系統送出期中預警，直接反映課堂學習嚴重困難。",
+    bullets: [
+      "<b>期中預警觸發 (midterm_warn = 1)</b>：任一門課程被預警即成真，大幅提升即時動態勝率。",
+      "<b>多科預警加權</b>：同時 2 科以上預警之學生，直接列入高優先序觀察對象。",
+      "<b>即時交付</b>：課務組資料匯出後 3 個工作天內即時刷新快迴圈關懷名單。"
+    ]
+  },
+  "st-att6": {
+    code: "F-02",
+    cat: "cat-interm",
+    badgeColor: "var(--c-attend)",
+    badgeText: "課堂出勤紀錄 (授課教師 / 點名系統)",
+    name: "第 6 週 出勤率初檢站",
+    eng: "Week 6 Attendance Check",
+    owner: "教務處 / 任課教師線上點名系統",
+    timing: "學期第 6 週結束前",
+    concept: "學期進行中的第一道即時信號。學生長期未到課通常早於期中考成績公布。",
+    bullets: [
+      "<b>出席率計算</b>：實際出席節數 / 應出席節數之全校平均。",
+      "<b>初階警示門檻</b>：低於 70% 即觸發第一道勝率比加重（Likelihood Ratio, LR）。",
+      "<b>缺資料保護原則</b>：若部分課程未實施線上點名，空值絕不自動加重風險（Missing signal never raises risk）。"
+    ]
+  },
+  "st-att12": {
+    code: "F-03",
+    cat: "cat-interm",
+    badgeColor: "var(--c-attend)",
+    badgeText: "課堂出勤紀錄 (授課教師 / 點名系統)",
+    name: "第 12 週 出勤重度警示站",
+    eng: "Week 12 Attendance Warning",
+    owner: "教務處 / 任課教師線上點名系統",
+    timing: "學期第 12 週",
+    concept: "若第 6 週已亮黃燈，第 12 週出席率再度下滑，代表課堂抽離現象已非常嚴重。",
+    bullets: [
+      "<b>重度加重門檻</b>：出席率低於 50% 者，動態勝率加重乘數倍增。",
+      "<b>與期中預警聯動</b>：若同時出席率低於 50% 且期中考多科不及格，自動升級為最高危險群。"
+    ]
+  },
+  "st-quiz": {
+    code: "F-04",
+    cat: "cat-interm",
+    badgeColor: "var(--c-lms)",
+    badgeText: "學習歷程資料 (新 ee-class 系統)",
+    name: "第 8 週 課業表現與小考站",
+    eng: "Week 8 Quiz & HW Performance",
+    owner: "教學發展中心 (新 ee-class) / 授課教師",
+    timing: "學期第 8 週",
+    concept: "在期中考前，透過平時作業繳交與小考分數，提早捕捉學習落後跡象。",
+    bullets: [
+      "<b>班級常模 z 分數 (quiz_mean_z)</b>：以各修課班級內平均值標準化，排除給分寬嚴偏差。",
+      "<b>作業缺交指標</b>：連續兩次重大作業未繳交者自動記錄警訊。"
+    ]
+  },
+  "st-lms": {
+    code: "F-05",
+    cat: "cat-interm",
+    badgeColor: "var(--c-lms)",
+    badgeText: "學習歷程資料 (新 ee-class 系統)",
+    name: "第 12 週 新 ee-class 平台沉寂告警站",
+    eng: "Week 12 ee-class Inactivity Alert",
+    owner: "教學發展中心 (新 ee-class 系統)",
+    timing: "學期第 12 週",
+    concept: "學期後段棄保效應的關鍵指標。若學生連續兩週未登入平台且無教材下載紀錄，代表即將實質放棄該學期。",
+    bullets: [
+      "<b>連續 14 天未登入</b>：無任何系統學習軌跡與教材下載記錄。",
+      "<b>數位足跡歸零</b>：結合期中預警，作為輔導老師優先介入的重要佐證。"
+    ]
+  },
+  "st-irmerge": {
+    code: "HUB-B",
+    cat: "cat-interm",
+    badgeColor: "var(--c-trunk-ir)",
+    badgeText: "快迴圈匯流 (校務研究 IR)",
+    name: "IR 快迴圈匯流計算站",
+    eng: "IR Fast-Loop Merge & p_fast Scoring",
+    owner: "校務研究 IR 辦公室",
+    timing: "第 6、8、10、12 週課務組資料到位後",
+    concept: "教務處課務組的期中預警、出勤與 ee-class 資料以學號交給 IR；IR 以對照金鑰與 p_slow 合併，計算動態風險 p_fast，再輸出三級名單。",
+    bullets: [
+      "<b>單一匯流點</b>：資料合併、計算與金鑰都留在 IR，處室與輔導端不需處理原始資料。",
+      "<b>輸出最小化</b>：對外只交付三級名單（高 / 觀察 / 低），不交付分數本身。",
+      "<b>更新節奏</b>：依課務組資料交付時間更新，名單較即時匯出版本略有延遲。"
+    ]
+  },
+  "st-list": {
+    code: "TRIAGE",
+    cat: "cat-feedback",
+    badgeColor: "var(--c-triage)",
+    badgeText: "三級關懷名單 (學輔中心 / 導師室)",
+    name: "三級關懷名單決策總站",
+    eng: "Care Triage & Advisor Outreach Hub",
+    owner: "學務處 學輔中心 / 各系所導師",
+    timing: "各處室訊號交付後 3 個工作天內動態發布",
+    concept: "接收 IR 匯流計算站輸出的三級關懷名單，由學輔中心與導師依級別安排關懷；名單端不接觸原始資料與全校分數。",
+    bullets: [
+      "<b>三級分流防護</b>：分為『優先關懷（高）』、『持續觀察（中）』與『常態輔導（低）』三級。",
+      "<b>輔導人力容量管理 (Top-K)</b>：可依照學輔人力設定每月晤談上限（如 Top 50 名），避免輔導端超載。",
+      "<b>邀請晤談倫理原則</b>：對學生端僅以『導師暖心關懷晤談邀請』呈現，絕對不對學生揭露風險分數；名單僅供輔導教師參考。"
+    ]
+  },
+  "st-counsel-log": {
+    code: "FB-01",
+    cat: "cat-feedback",
+    badgeColor: "var(--c-feedback)",
+    badgeText: "輔導與閉環回饋",
+    name: "輔導晤談與處遇記錄站",
+    eng: "Advisor Contact & Outreach Log",
+    owner: "各系所導師 / 學務處 學輔中心",
+    timing: "晤談完成後隨時填報，學期末統一歸檔",
+    concept: "快迴圈名單派案後，導師端是否成功完成晤談、學生面臨之核心困擾（學業、志趣不合、經濟或心理）均於此記錄。",
+    bullets: [
+      "<b>晤談狀態標記</b>：已聯繫並完成晤談、聯繫未果、已轉介專任諮商心理師等。",
+      "<b>介入歷程追蹤</b>：作為驗證預測模型是否有效降低退學率的重要實證依據。"
+    ]
+  },
+  "st-recal": {
+    code: "FB-02",
+    cat: "cat-feedback",
+    badgeColor: "var(--c-feedback)",
+    badgeText: "輔導與閉環回饋",
+    name: "次學期續讀對齊與閉環校正",
+    eng: "Next-term Outcome & LR Recalibration",
+    owner: "校務研究辦公室 (IR Office)",
+    timing: "次學期開學註冊底定後 (Week 2)",
+    concept: "雙迴圈最關鍵的閉環機制！對齊實際休退學結果，重新估算快迴圈中各處室信號的勝率比 (Likelihood Ratios, LR)。",
+    bullets: [
+      "<b>次學期註冊檢驗</b>：實際在學、休學或退學結果對齊。",
+      "<b>重新估算 LR 乘數</b>：更新 fast_loop.toml 設定檔，將專家經驗參數替換為校內真實實證估計值。",
+      "<b>模型持續自我演進</b>：使雙迴圈系統一年比一年更加精準！"
+    ]
+  }
+};
+
+// Render Project Overview in Right Drawer (Default & "全線總覽" state)
+function renderProjectOverview() {
+  const badgeEl = document.getElementById("d-badge");
+  const titleEl = document.getElementById("d-title");
+  const engEl = document.getElementById("d-eng");
+  const contentEl = document.getElementById("d-content");
+
+  badgeEl.style.background = "linear-gradient(135deg, var(--c-admissions), var(--c-warning))";
+  badgeEl.textContent = "StayOn 團隊 • 校務研究專案全貌";
+  titleEl.textContent = "StayOn 學生休退學風險雙迴圈預警機制";
+  engEl.textContent = "StayOn Project • Student Withdrawal Early Warning & Dual-Loop Intervention";
+
+  let html = `
+    <div class="info-card" style="border-left: 3px solid var(--c-trunk-ir);">
+      <div style="font-weight:700;font-size:0.92rem;color:var(--ink);margin-bottom:4px;">
+        StayOn 核心願景：守護學生在學續讀不掉隊
+      </div>
+      <p style="font-size:0.84rem;line-height:1.65;color:var(--ink-secondary);">
+        <b>「StayOn」團隊</b>取名自協助學生在大學生涯中穩定續讀、持續前行（Stay On track）。本機制由<b>校務研究辦公室 (IR Office)</b> 串聯教務處、學務處、數位學習中心（新 ee-class 系統）與各系所導師，建立<b>「慢迴圈（期末宏觀基線）」</b>與<b>「快迴圈（學期即時預警）」</b>相結合的雙迴圈運作路網，及早接住每一位需要關懷的學生。
+      </p>
+    </div>
+
+    <div>
+      <div class="section-label" style="margin-bottom:8px;">雙迴圈四大運作階段</div>
+      <ul class="item-list">
+        <li><b>1. 慢迴圈 (學期期末宏觀)</b>：期末整合招生管道、大考各科常模剖面、UCAN 職涯興趣與歷年學業歷程，以逐年滾動驗證 (Rolling Validation) 訓練預測模型，產出每位在學生的基線風險底分 <code style="font-family:var(--font-mono);font-size:0.85em;color:var(--c-trunk-ir);">p_slow</code>。</li>
+        <li><b>2. 跨處室安全交接 (第 0 週)</b>：IR 於開學前交付去識別化加密檔 <code style="font-family:var(--font-mono);font-size:0.85em;">slow.csv</code>（加鹽雜湊 pid），全校僅學輔專責人員持有一把對照金鑰，兼顧即時輔導與隱私安全。</li>
+        <li><b>3. 快迴圈 (學期中即時介入)</b>：學期進行中依週次動態納入<b>第 6/12 週出勤率、第 8 週小考常模、第 9-10 週教務期中預警、第 12 週 新 ee-class 平台 14 天未登入</b>，以勝率比 (LR) 計算動態風險 <code style="font-family:var(--font-mono);font-size:0.85em;color:var(--c-warning);">p_fast</code>，排序產出「三級關懷名單（高/觀察/低）」，供導師依輔導量能 (Top-K) 發動關懷晤談。</li>
+        <li><b>4. 閉環成效反饋校正</b>：學期末將導師晤談紀錄與次學期註冊續讀結果對齊，回流 IR 重新校正模型參數與快迴圈勝率比，形成自我演進的閉環機制。</li>
+      </ul>
+    </div>
+
+    <div>
+      <div class="section-label" style="margin-bottom:8px;">三大倫理與執行守則</div>
+      <div class="info-card">
+        <div style="font-size:0.83rem;line-height:1.6;color:var(--ink-secondary);display:grid;gap:6px;">
+          <div>🤝 <b>邀請而非標籤</b>：名單以「導師暖心晤談邀請」呈現，絕對不向學生揭露風險分數，避免標籤化效應。</div>
+          <div>🛡️ <b>缺資料保護原則</b>：任何課程或處室若無特定信號（如無線上點名），空值絕不自動拉高學生風險。</div>
+          <div>🔒 <b>嚴格時序無未來外洩</b>：模型特徵具有嚴格時間戳約束，絕無後續資訊滲漏，確保實證科學性。</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label" style="margin-bottom:8px;">6 大處室資料分流圖例對照</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;background:var(--surface-alt);padding:10px 12px;border-radius:8px;border:1px solid var(--line-border);font-size:0.8rem;">
+        <div style="display:flex;align-items:center;gap:6px;"><span style="width:9px;height:9px;border-radius:50%;background:var(--c-admissions);flex-shrink:0;"></span><b>教務處 招生組</b></div>
+        <div style="display:flex;align-items:center;gap:6px;"><span style="width:9px;height:9px;border-radius:50%;background:var(--c-warning);flex-shrink:0;"></span><b>教務處 課務組（預警/出勤/ee-class）</b></div>
+        <div style="display:flex;align-items:center;gap:6px;"><span style="width:9px;height:9px;border-radius:50%;background:var(--c-career);flex-shrink:0;"></span><b>學務處 職涯中心</b></div>
+        <div style="display:flex;align-items:center;gap:6px;"><span style="width:9px;height:9px;border-radius:50%;background:var(--c-academic);flex-shrink:0;"></span><b>教務處 註冊組</b></div>
+        <div style="display:flex;align-items:center;gap:6px;"><span style="width:9px;height:9px;border-radius:50%;background:var(--c-trunk-ir);flex-shrink:0;"></span><b>校務研究 IR</b></div>
+        <div style="display:flex;align-items:center;gap:6px;"><span style="width:9px;height:9px;border-radius:50%;background:var(--c-triage);flex-shrink:0;"></span><b>學輔中心/導師</b></div>
+      </div>
+    </div>
+
+    <div style="background:var(--surface-alt);border:1px dashed var(--line-border);border-radius:8px;padding:12px;font-size:0.8rem;color:var(--muted);line-height:1.5;">
+      💡 <b>互動提示</b>：點擊左側地圖任一車站，地圖將<b>自動平滑推進 Zoom In</b>，右側視窗將即時切換至該車站的負責單位、更新時程、指標規格與判斷標準！
+    </div>
+  `;
+
+  contentEl.innerHTML = html;
+  contentEl.scrollTop = 0;
+}
+
+// Render Station Drawer (When a station is clicked)
+function renderStation(id) {
+  const data = METRO_DATA[id];
+  if (!data) return;
+
+  const badgeEl = document.getElementById("d-badge");
+  const titleEl = document.getElementById("d-title");
+  const engEl = document.getElementById("d-eng");
+  const contentEl = document.getElementById("d-content");
+
+  badgeEl.style.background = data.badgeColor;
+  badgeEl.textContent = data.badgeText;
+  titleEl.textContent = data.name;
+  engEl.textContent = `${data.code} • ${data.eng}`;
+
+  let html = `
+    <div class="info-card">
+      <div class="info-row"><span class="info-label">資料提供 / 負責單位</span><span class="info-val">${data.owner}</span></div>
+      <div class="info-row"><span class="info-label">運作 / 更新時程</span><span class="info-val">${data.timing}</span></div>
+    </div>
+  `;
+
+  if (data.showProfileChart) {
+    html += `
+      <div class="info-card" style="border-left: 3px solid var(--c-admissions);">
+        <div style="font-weight:700;font-size:0.9rem;color:var(--c-admissions);margin-bottom:4px;">
+          各科幾何剖面分析範例
+        </div>
+        <p style="font-size:0.83rem;line-height:1.55;color:var(--ink-secondary);">
+          本站特徵挖掘學生相對於全體錄取生之<b>各科常模位階幾何形狀</b>，以評估是否存在強烈偏科、理文傾角不均或志趣非首選之早期徵候：
+        </p>
+
+        <!-- Profile Mockup -->
+        <div class="profile-bar-chart">
+          <div class="bar-row">
+            <span class="bar-name">國文</span>
+            <div class="bar-track"><div class="bar-fill" style="width:58%;background:#38bdf8;"></div></div>
+            <span class="bar-val">z: -0.2</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-name">英文</span>
+            <div class="bar-track"><div class="bar-fill" style="width:72%;background:#38bdf8;"></div></div>
+            <span class="bar-val">z: +0.6</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-name">數學</span>
+            <div class="bar-track"><div class="bar-fill" style="width:90%;background:#e11d48;"></div></div>
+            <span class="bar-val" style="color:#e11d48;font-weight:700;">z: +1.6</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-name">自然</span>
+            <div class="bar-track"><div class="bar-fill" style="width:84%;background:#e11d48;"></div></div>
+            <span class="bar-val" style="color:#e11d48;font-weight:700;">z: +1.2</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-name">社會</span>
+            <div class="bar-track"><div class="bar-fill" style="width:42%;background:#cbd5e1;"></div></div>
+            <span class="bar-val">z: -0.8</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  html += `
+    <div>
+      <div class="section-label" style="margin-bottom:8px;">處室資料概念與機制</div>
+      <p style="font-size:0.88rem;line-height:1.65;color:var(--ink-secondary);">${data.concept}</p>
+    </div>
+
+    <div>
+      <div class="section-label" style="margin-bottom:8px;">關鍵特徵 / 交付指標規格</div>
+      <ul class="item-list">
+        ${data.bullets.map(b => `<li>${b}</li>`).join('')}
+      </ul>
+    </div>
+  `;
+
+  contentEl.innerHTML = html;
+  contentEl.scrollTop = 0;
+}
+
+// ========================================================
+// CAMERA ZOOM & PAN SYSTEM (Smooth Zoom In, Drag-Pan, Wheel)
+// ========================================================
+const svg = document.getElementById("metro-svg");
+const viewport = document.getElementById("viewport-container");
+const DEFAULT_VIEW = { x: 0, y: 0, w: 1400, h: 760 };
+let currentView = { ...DEFAULT_VIEW };
+let targetView = { ...DEFAULT_VIEW };
+let animationFrameId = null;
+
+function setViewBox(v) {
+  svg.setAttribute("viewBox", `${v.x} ${v.y} ${v.w} ${v.h}`);
+}
+
+function animateViewBox(target, duration = 450) {
+  if (animationFrameId) cancelAnimationFrame(animationFrameId);
+  const start = { ...currentView };
+  const startTime = performance.now();
+
+  function easeInOutCubic(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
+
+  function step(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const ease = easeInOutCubic(progress);
+
+    currentView.x = start.x + (target.x - start.x) * ease;
+    currentView.y = start.y + (target.y - start.y) * ease;
+    currentView.w = start.w + (target.w - start.w) * ease;
+    currentView.h = start.h + (target.h - start.h) * ease;
+
+    setViewBox(currentView);
+
+    if (progress < 1) {
+      animationFrameId = requestAnimationFrame(step);
+    }
+  }
+
+  animationFrameId = requestAnimationFrame(step);
+}
+
+// Zoom in smoothly to clicked station
+function zoomToStation(nodeElement) {
+  if (!nodeElement) return;
+  const transform = nodeElement.getAttribute("transform");
+  if (!transform) return;
+
+  const match = transform.match(/translate\(([^,]+),\s*([^)]+)\)/);
+  if (!match) return;
+
+  const sx = parseFloat(match[1]);
+  const sy = parseFloat(match[2]);
+
+  // Window size (~1.7x zoom)
+  const targetW = 820;
+  const targetH = 445;
+
+  let targetX = sx - targetW / 2;
+  let targetY = sy - targetH / 2;
+
+  // Clamp within map bounds
+  targetX = Math.max(-20, Math.min(1400 - targetW + 20, targetX));
+  targetY = Math.max(-20, Math.min(760 - targetH + 20, targetY));
+
+  targetView = { x: targetX, y: targetY, w: targetW, h: targetH };
+  animateViewBox(targetView, 480);
+}
+
+function resetZoom() {
+  targetView = { ...DEFAULT_VIEW };
+  animateViewBox(targetView, 450);
+}
+
+function zoomStep(factor) {
+  const newW = Math.max(450, Math.min(1600, currentView.w * factor));
+  const newH = newW * (760 / 1400);
+  const centerX = currentView.x + currentView.w / 2;
+  const centerY = currentView.y + currentView.h / 2;
+
+  targetView = {
+    x: Math.max(-200, Math.min(1600 - newW, centerX - newW / 2)),
+    y: Math.max(-100, Math.min(860 - newH, centerY - newH / 2)),
+    w: newW,
+    h: newH
+  };
+  animateViewBox(targetView, 350);
+}
+
+// Toolbar listeners
+document.getElementById("btn-zoom-in").addEventListener("click", () => zoomStep(0.75));
+document.getElementById("btn-zoom-out").addEventListener("click", () => zoomStep(1.33));
+document.getElementById("btn-zoom-reset").addEventListener("click", () => {
+  resetZoom();
+  document.querySelectorAll(".station-node").forEach(node => node.classList.remove("active"));
+  document.querySelectorAll(".metro-branch").forEach(branch => branch.classList.remove("dimmed"));
+  document.querySelectorAll(".filter-btn:not(#btn-toggle-legend):not(#btn-toggle-drawer)").forEach(b => b.classList.remove("active"));
+  document.querySelector('.filter-btn[data-filter="all"]')?.classList.add("active");
+  renderProjectOverview();
+});
+
+// ========================================================
+// MOUSE DRAG-TO-PAN & WHEEL ZOOM SYSTEM
+// ========================================================
+let isPanning = false;
+let hasDragged = false;
+let startMouseX = 0, startMouseY = 0;
+let startViewX = 0, startViewY = 0;
+
+viewport.addEventListener("mousedown", (e) => {
+  if (e.target.closest("button") || e.target.closest(".legend-dock") || e.target.closest(".detail-drawer") || e.target.closest(".zoom-toolbar")) {
+    return;
+  }
+  isPanning = true;
+  hasDragged = false;
+  startMouseX = e.clientX;
+  startMouseY = e.clientY;
+  startViewX = currentView.x;
+  startViewY = currentView.y;
+  viewport.classList.add("panning");
+});
+
+window.addEventListener("mousemove", (e) => {
+  if (!isPanning) return;
+  const dx = e.clientX - startMouseX;
+  const dy = e.clientY - startMouseY;
+  if (Math.hypot(dx, dy) > 5) {
+    hasDragged = true;
+  }
+
+  const rect = svg.getBoundingClientRect();
+  const scaleX = currentView.w / rect.width;
+  const scaleY = currentView.h / rect.height;
+
+  const newX = startViewX - dx * scaleX;
+  const newY = startViewY - dy * scaleY;
+
+  currentView.x = Math.max(-250, Math.min(1650 - currentView.w, newX));
+  currentView.y = Math.max(-150, Math.min(910 - currentView.h, newY));
+  targetView = { ...currentView };
+  setViewBox(currentView);
+});
+
+window.addEventListener("mouseup", () => {
+  if (isPanning) {
+    isPanning = false;
+    viewport.classList.remove("panning");
+  }
+});
+
+// Mouse wheel zoom centered at cursor position
+viewport.addEventListener("wheel", (e) => {
+  e.preventDefault();
+  if (animationFrameId) cancelAnimationFrame(animationFrameId);
+
+  const rect = svg.getBoundingClientRect();
+  const mouseX = e.clientX - rect.left;
+  const mouseY = e.clientY - rect.top;
+
+  const svgX = currentView.x + (mouseX / rect.width) * currentView.w;
+  const svgY = currentView.y + (mouseY / rect.height) * currentView.h;
+
+  const zoomFactor = e.deltaY < 0 ? 0.88 : 1.14;
+  const newW = Math.max(450, Math.min(1600, currentView.w * zoomFactor));
+  const newH = newW * (760 / 1400);
+
+  const newX = svgX - (mouseX / rect.width) * newW;
+  const newY = svgY - (mouseY / rect.height) * newH;
+
+  currentView = {
+    x: Math.max(-250, Math.min(1650 - newW, newX)),
+    y: Math.max(-150, Math.min(910 - newH, newY)),
+    w: newW,
+    h: newH
+  };
+  targetView = { ...currentView };
+  setViewBox(currentView);
+}, { passive: false });
+
+// Touch Drag Support for Tablets/Laptops
+let touchStartX = 0, touchStartY = 0;
+viewport.addEventListener("touchstart", (e) => {
+  if (e.touches.length === 1) {
+    const t = e.touches[0];
+    touchStartX = t.clientX;
+    touchStartY = t.clientY;
+    startViewX = currentView.x;
+    startViewY = currentView.y;
+  }
+}, { passive: true });
+
+viewport.addEventListener("touchmove", (e) => {
+  if (e.touches.length === 1) {
+    const t = e.touches[0];
+    const dx = t.clientX - touchStartX;
+    const dy = t.clientY - touchStartY;
+    const rect = svg.getBoundingClientRect();
+    const scaleX = currentView.w / rect.width;
+    const scaleY = currentView.h / rect.height;
+
+    currentView.x = Math.max(-250, Math.min(1650 - currentView.w, startViewX - dx * scaleX));
+    currentView.y = Math.max(-150, Math.min(910 - currentView.h, startViewY - dy * scaleY));
+    targetView = { ...currentView };
+    setViewBox(currentView);
+  }
+}, { passive: true });
+
+// ========================================================
+// DRAWER & LEGEND CONTROLS
+// ========================================================
+const drawer = document.getElementById("detail-drawer");
+const btnToggleDrawer = document.getElementById("btn-toggle-drawer");
+const btnCloseDrawer = document.getElementById("btn-close-drawer");
+const btnOpenDrawer = document.getElementById("btn-open-drawer");
+
+function setDrawerVisible(visible) {
+  if (visible) {
+    drawer?.classList.remove("collapsed");
+    if (btnOpenDrawer) btnOpenDrawer.style.display = "none";
+    if (btnToggleDrawer) btnToggleDrawer.classList.add("active");
+  } else {
+    drawer?.classList.add("collapsed");
+    if (btnOpenDrawer) btnOpenDrawer.style.display = "flex";
+    if (btnToggleDrawer) btnToggleDrawer.classList.remove("active");
+  }
+}
+
+btnToggleDrawer?.addEventListener("click", () => {
+  const isCollapsed = drawer?.classList.contains("collapsed");
+  setDrawerVisible(isCollapsed);
+});
+
+btnCloseDrawer?.addEventListener("click", () => {
+  setDrawerVisible(false);
+});
+
+btnOpenDrawer?.addEventListener("click", () => {
+  setDrawerVisible(true);
+});
+
+// Legend Dock Controls
+const legendDock = document.getElementById("legend-dock");
+const btnToggleLegendHeader = document.getElementById("btn-toggle-legend");
+const btnToggleLegendDock = document.getElementById("btn-toggle-legend-dock");
+const legendDockTitleBtn = document.getElementById("legend-dock-title-btn");
+
+function setLegendDockCollapsed(collapsed) {
+  if (collapsed) {
+    legendDock?.classList.add("collapsed");
+    if (btnToggleLegendDock) btnToggleLegendDock.textContent = "展開 ▴";
+    if (btnToggleLegendHeader) btnToggleLegendHeader.classList.remove("active");
+  } else {
+    legendDock?.classList.remove("collapsed");
+    if (btnToggleLegendDock) btnToggleLegendDock.textContent = "收合 ▾";
+    if (btnToggleLegendHeader) btnToggleLegendHeader.classList.add("active");
+  }
+}
+
+btnToggleLegendHeader?.addEventListener("click", () => {
+  const isCollapsed = legendDock?.classList.contains("collapsed");
+  setLegendDockCollapsed(!isCollapsed);
+});
+
+btnToggleLegendDock?.addEventListener("click", (e) => {
+  e.stopPropagation();
+  const isCollapsed = legendDock?.classList.contains("collapsed");
+  setLegendDockCollapsed(!isCollapsed);
+});
+
+legendDockTitleBtn?.addEventListener("click", () => {
+  const isCollapsed = legendDock?.classList.contains("collapsed");
+  setLegendDockCollapsed(!isCollapsed);
+});
+
+// Click on legend chip to filter directly
+document.querySelectorAll(".legend-chip").forEach(chip => {
+  chip.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const filter = chip.getAttribute("data-filter");
+    if (filter) {
+      const targetBtn = document.querySelector(`.filter-btn[data-filter="${filter}"]`);
+      if (targetBtn) {
+        targetBtn.click();
+      } else {
+        applyFilter(filter);
+      }
+    }
+  });
+});
+
+// ========================================================
+// STATION SELECTION & FILTERING
+// ========================================================
+let activeStationId = null;
+
+function selectStation(id, shouldZoom = true) {
+  activeStationId = id;
+  document.querySelectorAll(".station-node").forEach(node => {
+    node.classList.remove("active");
+  });
+  const el = document.getElementById(id);
+  if (el) {
+    el.classList.add("active");
+    if (shouldZoom) zoomToStation(el);
+  }
+  setDrawerVisible(true); // Always reveal details!
+  renderStation(id);
+}
+
+// Attach click listeners to stations (guard against drag pan)
+document.querySelectorAll(".station-node").forEach(node => {
+  node.addEventListener("click", (e) => {
+    if (hasDragged) {
+      e.stopPropagation();
+      return;
+    }
+    e.stopPropagation();
+    const id = node.getAttribute("data-id");
+    if (id) selectStation(id, true);
+  });
+});
+
+// Train & Passenger Flow Animation Toggle
+const btnToggleTrains = document.getElementById("btn-toggle-trains");
+let trainsRunning = true;
+
+btnToggleTrains?.addEventListener("click", () => {
+  trainsRunning = !trainsRunning;
+  if (trainsRunning) {
+    viewport.classList.remove("trains-paused");
+    svg.unpauseAnimations();
+    btnToggleTrains.classList.add("active");
+    btnToggleTrains.innerHTML = '<span class="dot" style="background:#22c55e"></span>🚇 列車運轉';
+  } else {
+    viewport.classList.add("trains-paused");
+    svg.pauseAnimations();
+    btnToggleTrains.classList.remove("active");
+    btnToggleTrains.innerHTML = '<span class="dot" style="background:#f59e0b"></span>⏸️ 動畫暫停';
+  }
+});
+
+// Double click map background resets zoom and returns to project overview
+viewport.addEventListener("dblclick", (e) => {
+  if (e.target.closest(".station-node") || e.target.closest("button") || e.target.closest(".legend-dock")) return;
+  resetZoom();
+  document.querySelectorAll(".station-node").forEach(node => node.classList.remove("active"));
+  document.querySelectorAll(".metro-branch").forEach(branch => branch.classList.remove("dimmed"));
+  document.querySelectorAll(".metro-train").forEach(t => t.classList.remove("dimmed"));
+  document.querySelectorAll(".passenger-dot").forEach(p => p.classList.remove("dimmed"));
+  document.querySelectorAll(".filter-btn:not(#btn-toggle-legend):not(#btn-toggle-drawer):not(#btn-toggle-trains)").forEach(b => b.classList.remove("active"));
+  document.querySelector('.filter-btn[data-filter="all"]')?.classList.add("active");
+  renderProjectOverview();
+});
+
+// Category / Department Filtering
+const filterBtns = document.querySelectorAll(".filter-btn:not(#btn-toggle-legend):not(#btn-toggle-drawer):not(#btn-toggle-trains)");
+filterBtns.forEach(btn => {
+  btn.addEventListener("click", () => {
+    filterBtns.forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    const filter = btn.getAttribute("data-filter");
+    applyFilter(filter);
+  });
+});
+
+function applyFilter(filter) {
+  const allNodes = document.querySelectorAll(".station-node");
+  const allBranches = document.querySelectorAll(".metro-branch");
+  const allTrains = document.querySelectorAll(".metro-train");
+  const allFlows = document.querySelectorAll(".passenger-dot");
+
+  allNodes.forEach(node => node.classList.remove("dimmed"));
+  allBranches.forEach(branch => branch.classList.remove("dimmed"));
+  allTrains.forEach(train => train.classList.remove("dimmed"));
+  allFlows.forEach(dot => dot.classList.remove("dimmed"));
+
+  if (filter === "cat-admissions") {
+    allNodes.forEach(node => {
+      if (!node.classList.contains("cat-admissions")) node.classList.add("dimmed");
+    });
+    document.getElementById("branch-warning")?.classList.add("dimmed");
+    document.getElementById("branch-attend")?.classList.add("dimmed");
+    document.getElementById("branch-lms")?.classList.add("dimmed");
+    allTrains.forEach(t => { if (t.id !== "train-admissions") t.classList.add("dimmed"); });
+    selectStation("st-exam", true);
+  } else if (filter === "cat-career") {
+    allNodes.forEach(node => {
+      if (!node.classList.contains("cat-career")) node.classList.add("dimmed");
+    });
+    allTrains.forEach(t => { if (t.id !== "train-career") t.classList.add("dimmed"); });
+    selectStation("st-ucan", true);
+  } else if (filter === "cat-academic") {
+    allNodes.forEach(node => {
+      if (!node.classList.contains("cat-academic")) node.classList.add("dimmed");
+    });
+    allTrains.forEach(t => { if (t.id !== "train-academic" && t.id !== "train-trunk") t.classList.add("dimmed"); });
+    selectStation("st-grade", true);
+  } else if (filter === "cat-interm") {
+    allNodes.forEach(node => {
+      if (!node.classList.contains("cat-interm")) node.classList.add("dimmed");
+    });
+    document.getElementById("branch-admissions")?.classList.add("dimmed");
+    document.getElementById("branch-career")?.classList.add("dimmed");
+    document.getElementById("branch-academic")?.classList.add("dimmed");
+    allTrains.forEach(t => { if (t.id !== "train-warning" && t.id !== "train-attend" && t.id !== "train-lms") t.classList.add("dimmed"); });
+    selectStation("st-mid", true);
+  } else if (filter === "cat-feedback") {
+    allNodes.forEach(node => {
+      if (!node.classList.contains("cat-feedback")) node.classList.add("dimmed");
+    });
+    allTrains.forEach(t => { if (t.id !== "train-feedback") t.classList.add("dimmed"); });
+    selectStation("st-recal", true);
+  } else {
+    // "all" - 全線總覽: Reset zoom, clear active stations, show project overview!
+    resetZoom();
+    allNodes.forEach(node => node.classList.remove("active"));
+    allBranches.forEach(branch => branch.classList.remove("dimmed"));
+    allTrains.forEach(train => train.classList.remove("dimmed"));
+    allFlows.forEach(dot => dot.classList.remove("dimmed"));
+    renderProjectOverview();
+  }
+}
+
+// Theme Toggle
+const themeBtn = document.getElementById("theme-toggle");
+themeBtn.addEventListener("click", () => {
+  const current = document.documentElement.getAttribute("data-theme");
+  const next = current === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", next);
+});
+
+// Initialize on load with Project Overview
+window.addEventListener("DOMContentLoaded", () => {
+  resetZoom();
+  renderProjectOverview();
+});
+</script>
+
+<script>
+// ===== Student risk-change module (illustrative simulation only; all values random) =====
+(function () {
+  const NS = "http://www.w3.org/2000/svg";
+  const P = { // station coordinates (match transforms above)
+    route: [270, 160], exam: [440, 160], ucan: [355, 280], grade: [355, 400],
+    model: [580, 280], handoff: [750, 280], att6: [940, 280], quiz: [1010, 400],
+    mid: [1075, 160], att12: [1110, 280], lms: [1175, 400], irmerge: [1290, 280], list: [1290, 440],
+    counsel: [1040, 600], recal: [720, 600]
+  };
+  const HIGH = 0.6, MID = 0.4;
+  const layer = document.getElementById("sim-layer");
+  const panel = document.getElementById("sim-panel");
+  const $ = id => document.getElementById(id);
+  const btnPause = $("sim-pause");
+
+  let students = [], stage = 0, paused = false, timer = null, tickFn = null;
+
+  const rand = (a, b) => a + Math.random() * (b - a);
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+  const clamp = v => Math.max(0.01, Math.min(0.99, v));
+  const tier = s => s >= HIGH ? ["高", "var(--sim-high)"] : s >= MID ? ["觀察", "var(--sim-mid)"] : ["低", "var(--sim-low)"];
+  const hex4 = () => "#" + Math.floor(rand(4096, 65535)).toString(16).toUpperCase().padStart(4, "0");
+
+  function el(tag, attrs, parent) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    (parent || layer).appendChild(e);
+    return e;
+  }
+
+  // ---------- data generation ----------
+  function makeStudents() {
+    const bands = [[0.06, 0.18], [0.16, 0.30], [0.32, 0.42], [0.43, 0.50], [0.51, 0.58]];
+    const letters = ["A", "B", "C", "D", "E"].sort(() => Math.random() - 0.5);
+    students = bands.map((b, k) => {
+      const r = +rand(b[0], b[1]).toFixed(2);
+      const w = [rand(.5, 1.5), rand(.5, 1.5), rand(.5, 1.5), rand(.8, 2)];
+      const ws = w.reduce((a, c) => a + c, 0);
+      return {
+        name: "學生 " + letters[k], hash: hex4(), base: r, score: r, rank: k,
+        parts: w.map(x => r * x / ws),
+        route: (r < .3 ? pick(["繁星推薦", "個人申請"]) : pick(["分科測驗", "個人申請", "特殊選才"])) +
+               (Math.random() < r ? " · 第一代大學生" : " · 一般生"),
+        exam: ["國", "英", "數"].map(s => s + Math.round(Math.max(5, Math.min(99, 88 - r * 70 + rand(-10, 10))))).join(" ") + " (PR)",
+        ucan: pick(["研究型", "社會型", "藝術型", "企業型", "實用型", "事務型"]) + " · 契合度 " + (r < .3 ? "高" : r < .45 ? "中" : "低"),
+        grade: "GPA " + Math.max(1.2, 3.9 - r * 2.4 + rand(-.2, .2)).toFixed(2) + " · 預警 " + Math.round(r * 4) + " 科"
+      };
+    }).sort(() => Math.random() - 0.5);
+  }
+
+  // ---------- drawing ----------
+  let tokens = [];
+  function drawTokens() {
+    tokens = students.map(s => {
+      const g = el("g", { class: "sim-token" });
+      const body = el("g", { class: "body" }, g);
+      el("use", { href: "#metro-person-symbol", transform: "scale(2.6)" }, body);
+      const t = el("text", { y: 28 }, g);
+      const tag = el("text", { class: "tag", y: -25 }, g);
+      return { g, c: body, t, tag };
+    });
+  }
+  function moveToken(i, x, y) { tokens[i].g.style.transform = `translate(${x}px, ${y}px)`; }
+  function parkRow(xy, dy = 78, order) {
+    students.forEach((s, i) => {
+      const k = order ? order[i] : i;
+      moveToken(i, xy[0] + (k - 2) * 36, xy[1] + dy);
+    });
+  }
+  function paintTokens(useHash) {
+    students.forEach((s, i) => {
+      const tk = tokens[i];
+      tk.c.setAttribute("fill", tier(s.score)[1]);
+      tk.t.textContent = Math.round(s.score * 100);
+      tk.tag.textContent = useHash ? s.hash : s.name.slice(-1);
+    });
+  }
+  let focusEls = [];
+  function focus(keys, color = "var(--sim-high)", blink = false) {
+    focusEls.forEach(e => e.remove());
+    focusEls = keys.map(k => el("circle", {
+      cx: P[k][0], cy: P[k][1], r: 30, stroke: color,
+      class: blink ? "sim-focus sim-alert" : "sim-focus"
+    }));
+  }
+  function floatPlus(i, txt) {
+    const m = /translate\(([-\d.]+)px, ([-\d.]+)px\)/.exec(tokens[i].g.style.transform);
+    if (!m) return;
+    const t = el("text", { class: "sim-plus", x: +m[1] + 14, y: +m[2] - 10 });
+    t.textContent = txt;
+    setTimeout(() => t.remove(), 1500);
+  }
+
+  // ---------- panel ----------
+  function setHead(title, desc) {
+    $("sim-stage-pill").textContent = (stage + 1) + " / 5";
+    $("sim-title").textContent = title;
+    $("sim-desc").innerHTML = desc;
+    $("sim-prev").disabled = stage === 0;
+    $("sim-next").disabled = stage === 4;
+  }
+  function table(rows) {
+    $("sim-table").innerHTML = rows.map(r => {
+      const [tl, tc] = tier(r.score);
+      return `<div class="sim-row${r.flag ? " flag" : ""}">
+        <span class="sid">${r.id}</span>
+        <span>${r.attr ? `<span class="attr">${r.attr}</span>` : ""}
+          <div class="sim-bar"><i style="width:${Math.round(r.bar * 100)}%;background:${tc}"></i></div></span>
+        <span class="sim-score">${r.score.toFixed(2)}</span>
+        <span class="sim-tier" style="background:${tc}">${tl}</span></div>`;
+    }).join("");
+  }
+  const sub = html => { $("sim-sub").innerHTML = html; };
+
+  // ---------- loop control ----------
+  function loop(fn, ms) {
+    clearInterval(timer);
+    tickFn = fn;
+    fn();
+    timer = setInterval(() => { if (!paused) fn(); }, ms);
+  }
+  function setPaused(p) {
+    paused = p;
+    btnPause.textContent = p ? "▶ 繼續" : "⏸ 暫停";
+  }
+
+  // ---------- stages ----------
+  const STAGES = [
+    function stage1() {
+      students.forEach(s => s.score = s.base);
+      setHead("IR 期末風險模型總站：產出 5 位學生底分",
+        "期末模型整合入學、大考、UCAN 與歷年成績，為每位學生產出休退學風險底分 <b>p_slow</b>。");
+      focus(["model"], "var(--c-trunk-ir)");
+      parkRow(P.model); paintTokens(false);
+      sub("隨機生成 5 位學生的期末風險底分");
+      table(students.map(s => ({ id: s.name, score: s.score, bar: s.score })));
+      clearInterval(timer);
+    },
+    function stage2() {
+      const ST = [["route", "入學管道與背景"], ["exam", "大考學科常模剖面"], ["ucan", "UCAN 職業興趣施測"], ["grade", "歷年學業成績與預警"]];
+      setHead("分數計算示意：底分從哪裡來",
+        "依序走訪四個資料站，顯示這 5 位學生在各站可能的樣子；風險條為逐站累積的貢獻（示意權重）。可按暫停逐站講解。");
+      parkRow(P.model); paintTokens(false);
+      let k = 0;
+      loop(() => {
+        const [key, label] = ST[k];
+        focus([key], `var(--c-${key === "ucan" ? "career" : key === "grade" ? "academic" : "admissions"})`);
+        sub(`站點 ${k + 1}/4：${label}`);
+        table(students.map(s => {
+          const cum = s.parts.slice(0, k + 1).reduce((a, c) => a + c, 0);
+          return { id: s.name, attr: s[key], score: cum, bar: cum };
+        }));
+        k = (k + 1) % ST.length;
+      }, 3500);
+    },
+    function stage3() {
+      setHead("期初資料交接閘口：去識別化交付",
+        "底分送往交接閘口，學號以雜湊碼取代並打亂順序；對照金鑰留在 IR，供學期中快迴圈資料回 IR 匯流時對應。");
+      focus(["handoff"], "var(--muted)");
+      const order = [0, 1, 2, 3, 4].sort(() => Math.random() - 0.5);
+      parkRow(P.handoff, 78, order); paintTokens(false);
+      let n = 0;
+      loop(() => {
+        n++;
+        const done = n > 6;
+        students.forEach((s, i) => tokens[i].tag.textContent = done ? s.hash : hex4());
+        sub(done ? "雜湊完成，順序已打亂" : "雜湊編碼中…");
+        const rows = order.map((_, j) => order.indexOf(j)).map(i => ({
+          id: done ? students[i].hash : hex4(), attr: done ? "原學號已遮蔽" : "…", score: students[i].score, bar: students[i].score
+        }));
+        table(rows);
+        if (done) clearInterval(timer);
+      }, 220);
+    },
+    function stage4() {
+      setHead("快迴圈：學期中逐週更新",
+        "隨週數推進，課務組交付出勤、小考、期中預警與平台登入資訊給 IR 匯流計算 p_fast；風險上升者由三級關懷名單決策總站示警。");
+      // two students drift upward and cross the high threshold
+      const byBase = students.map((s, i) => i).sort((a, b) => students[a].base - students[b].base);
+      const r1 = byBase[2], r2 = byBase[4], r3 = byBase[3], lo = byBase[0];
+      const EV = {
+        6: ["att6", "出勤初檢 < 70%", [[r1, .08], [r2, .03]]],
+        8: ["quiz", "小考作業低於常模", [[r1, .07], [r3, .04], [lo, -.02]]],
+        10: ["mid", "期中預警", [[r1, .10], [r2, .07]]],
+        12: ["att12", "出勤 < 50% / 平台 14 天未登", [[r1, .08], [r2, .05], [r3, -.03]]]
+      };
+      let week = 0, alerted = new Set();
+      // waiting spots: normal students queue under IR merge, high-risk ones sit beside the decision hub
+      function parkAll() {
+        let n = 0, h = 0;
+        students.forEach((s, i) => {
+          if (alerted.has(s.hash)) moveToken(i, P.list[0] + 50 + (h++) * 34, P.list[1] + 4);
+          else moveToken(i, P.irmerge[0] - 72 + (n++) * 36, P.irmerge[1] + 62);
+        });
+      }
+      function render(evtLabel) {
+        paintTokens(true);
+        table(students.map(s => ({
+          id: s.hash, score: s.score, bar: s.score, flag: alerted.has(s.hash),
+          attr: s.score - s.base > 0.005 ? `p_slow ${s.base.toFixed(2)} → ${s.score.toFixed(2)}` : `p_slow ${s.base.toFixed(2)}`
+        })));
+        const alertTxt = alerted.size ? `<br><span style="color:var(--sim-high)">⚠ 三級關懷名單示警：${[...alerted].join("、")} 升為高關懷</span>` : "";
+        sub(`第 ${week} 週 ${evtLabel ? "· " + evtLabel : ""}${alertTxt}`);
+      }
+      students.forEach(s => s.score = s.base);
+      parkAll(); focus(["irmerge"], "var(--c-trunk-ir)");
+      loop(() => {
+        week++;
+        if (week > 19) { // restart the semester loop
+          week = 0; alerted = new Set();
+          students.forEach(s => s.score = s.base);
+          parkAll(); focus(["irmerge"], "var(--c-trunk-ir)"); render("學期重置"); return;
+        }
+        if (week > 18) { render("學期結束"); return; }
+        const ev = EV[week];
+        parkAll();
+        if (ev) {
+          const [key, label, hits] = ev;
+          hits.forEach(([i, d], n) => {
+            students[i].score = clamp(students[i].score + d);
+            moveToken(i, P[key][0] + (n - 0.5) * 30, P[key][1] + (key === "mid" ? 44 : -44));
+            setTimeout(() => floatPlus(i, (d > 0 ? "+" : "") + Math.round(d * 100)), 950);
+          });
+          // after the event visit, tokens return to IR merge for re-scoring; new high-risk ones go to the decision hub
+          setTimeout(() => {
+            if (stage !== 3 || panel.hidden) return; // user left this stage
+            students.forEach(s => { if (s.score >= HIGH && s.base < HIGH) alerted.add(s.hash); });
+            parkAll(); render(label);
+            focus(alerted.size ? ["irmerge", "list"] : ["irmerge"], "var(--c-trunk-ir)");
+            if (alerted.size) { focusEls[1].setAttribute("stroke", "var(--sim-high)"); focusEls[1].classList.add("sim-alert"); }
+          }, 1600);
+          focus([key], "var(--c-warning)");
+          render(label);
+        } else {
+          focus(alerted.size ? ["irmerge", "list"] : ["irmerge"], "var(--c-trunk-ir)");
+          if (alerted.size) { focusEls[1].setAttribute("stroke", "var(--sim-high)"); focusEls[1].classList.add("sim-alert"); }
+          render("");
+        }
+      }, 2400);
+    },
+    function stage5() {
+      setHead("閉環回饋：處遇紀錄與次學期校正",
+        "高關懷學生轉介輔導晤談，處遇紀錄回寫；次學期以實際續讀 / 休退結果校正模型，回到期末模型總站。");
+      // start from the end-of-semester state of the fast loop (same drift as stage 4)
+      const byBase = students.map((s, i) => i).sort((a, b) => students[a].base - students[b].base);
+      students.forEach(s => s.score = s.base);
+      [[2, .33], [4, .15], [3, .01], [0, -.02]].forEach(([k, d]) => students[byBase[k]].score = clamp(students[byBase[k]].base + d));
+      const high = students.map((s, i) => i).filter(i => students[i].score >= HIGH);
+      students.forEach((s, i) => {
+        s.outcome = high.includes(i) ? (i === high[0] ? "介入後續讀" : "休學（追蹤中）") : "續讀";
+      });
+      let step = 0;
+      const steps = [
+        () => { focus(["list"], "var(--c-triage)"); parkRow(P.list); sub("① 三級關懷名單確認"); return s => s.score >= HIGH ? "高關懷：轉介" : "持續觀察"; },
+        () => { focus(["counsel"], "var(--c-feedback)");
+                students.forEach((s, i) => high.includes(i) ? moveToken(i, P.counsel[0] + (high.indexOf(i) - .5) * 36, P.counsel[1] + 70) : null);
+                sub("② 輔導晤談與處遇紀錄"); return s => s.score >= HIGH ? "晤談 2 次 · 處遇已記錄" : "—"; },
+        () => { focus(["recal"], "var(--c-feedback)"); parkRow(P.recal); sub("③ 次學期續讀對齊"); return s => "結果：" + s.outcome; },
+        () => { focus(["model"], "var(--c-trunk-ir)"); parkRow(P.model); sub("④ 實際結果回寫，校正下一期 p_slow"); return () => "納入校正樣本"; }
+      ];
+      loop(() => {
+        const attrFn = steps[step]();
+        paintTokens(true);
+        table(students.map(s => ({ id: s.hash, attr: attrFn(s), score: s.score, bar: s.score, flag: s.score >= HIGH })));
+        step = (step + 1) % steps.length;
+      }, 3200);
+    }
+  ];
+
+  function go(n) {
+    clearInterval(timer);
+    stage = Math.max(0, Math.min(4, n));
+    setPaused(false);
+    STAGES[stage]();
+  }
+  function open() {
+    layer.innerHTML = ""; focusEls = [];
+    makeStudents(); drawTokens();
+    panel.hidden = false;
+    $("btn-toggle-sim").classList.add("active");
+    go(0);
+  }
+  function close() {
+    clearInterval(timer);
+    layer.innerHTML = ""; focusEls = [];
+    panel.hidden = true;
+    $("btn-toggle-sim").classList.remove("active");
+  }
+
+  $("btn-toggle-sim").addEventListener("click", () => panel.hidden ? open() : close());
+  $("sim-close").addEventListener("click", close);
+  $("sim-prev").addEventListener("click", () => go(stage - 1));
+  $("sim-next").addEventListener("click", () => go(stage + 1));
+  $("sim-reroll").addEventListener("click", open);
+  btnPause.addEventListener("click", () => setPaused(!paused));
+  $("sim-min").addEventListener("click", () => panel.classList.toggle("collapsed"));
+
+  // drag the panel by its header, kept inside the map viewport
+  const head = panel.querySelector(".sim-head");
+  head.addEventListener("pointerdown", e => {
+    if (e.target.closest("button")) return;
+    const box = panel.offsetParent.getBoundingClientRect();
+    const r = panel.getBoundingClientRect();
+    const dx = e.clientX - r.left, dy = e.clientY - r.top;
+    panel.classList.add("dragging");
+    head.setPointerCapture(e.pointerId);
+    const move = ev => {
+      const x = Math.max(0, Math.min(box.width - r.width, ev.clientX - box.left - dx));
+      const y = Math.max(0, Math.min(box.height - 40, ev.clientY - box.top - dy));
+      panel.style.left = x + "px"; panel.style.top = y + "px"; panel.style.right = "auto";
+    };
+    const up = () => {
+      panel.classList.remove("dragging");
+      head.removeEventListener("pointermove", move);
+      head.removeEventListener("pointerup", up);
+    };
+    head.addEventListener("pointermove", move);
+    head.addEventListener("pointerup", up);
+  });
+  // keep map drag/zoom handlers from swallowing panel clicks
+  ["mousedown", "dblclick", "wheel", "pointerdown"].forEach(ev => panel.addEventListener(ev, e => e.stopPropagation()));
+})();
+</script>
+
+</body>
+</html>
